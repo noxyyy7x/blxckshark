@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import { getStaffProfile, logActivity } from '@/lib/staff'
 
 // TODO: temporary owner-only gate until the full admin panel with proper
 // staff accounts/permissions is built. Real access control is enforced by
@@ -20,6 +21,7 @@ const CANNED_RESPONSES = [
 export default function StaffChatPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [staffId, setStaffId] = useState(null)
   const [chats, setChats] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
   const [messages, setMessages] = useState([])
@@ -33,6 +35,10 @@ export default function StaffChatPage() {
       router.push('/home')
     }
   }, [loading, user, isOwner, router])
+
+  useEffect(() => {
+    if (user) getStaffProfile(user.id).then((s) => setStaffId(s?.id))
+  }, [user])
 
   // Load all chats + subscribe to realtime updates
   useEffect(() => {
@@ -84,10 +90,12 @@ export default function StaffChatPage() {
 
   async function handleClaim(chatId) {
     await supabase.from('chats').update({ claimed: true }).eq('id', chatId)
+    await logActivity(staffId, 'chat_claimed', { chatId })
   }
 
   async function handleClose(chatId) {
     await supabase.from('chats').update({ status: 'closed' }).eq('id', chatId)
+    await logActivity(staffId, 'chat_closed', { chatId })
   }
 
   async function sendReply(text) {

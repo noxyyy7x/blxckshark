@@ -220,7 +220,7 @@ export default function CheckoutPage() {
               <h2 className="font-body mb-3 text-sm font-semibold">Shipping Method</h2>
               <div className="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-4 py-3">
                 <span className="font-body text-sm">
-                  {region === 'UK' ? 'Royal Mail Tracked' : 'International Standard'}
+                  {region === 'UK' ? 'Evri Tracked' : 'International Standard'}
                 </span>
                 <span className="font-body text-sm">
                   {freeShipping ? 'FREE' : `${regionConfig.symbol}${shippingCost.toFixed(2)}`}
