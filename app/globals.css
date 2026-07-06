@@ -21,3 +21,14 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.text-glow {
+  text-shadow: 0 0 60px rgba(255, 255, 255, 0.25);
+}
