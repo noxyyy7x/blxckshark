@@ -61,8 +61,7 @@ export default function CheckoutPage() {
     // Checkout.js widget here, and only proceed to confirmation once the
     // webhook confirms payment success (not directly from the client).
 
-    // If a referral/athlete code was used, credit the referrer's commission
-    // via the server-side API route (never done client-side).
+    // Credit referrer commission first (independent of order creation)
     if (appliedDiscount?.referrerId) {
       try {
         await fetch('/api/credit-referral', {
@@ -76,15 +75,38 @@ export default function CheckoutPage() {
           }),
         })
       } catch {
-        // Non-blocking — don't fail the order if commission crediting has an issue
+        // Non-blocking
       }
     }
 
-    setTimeout(() => {
-      const orderId = `BS-${Date.now().toString().slice(-8)}`
+    // MOCK PAYMENT — TODO: replace with real embedded Revolut Checkout.js.
+    // On real integration: create the Revolut order, mount Checkout.js, and
+    // only call /api/complete-order once the Revolut webhook confirms
+    // payment success server-side (not directly from the client like this).
+    try {
+      const res = await fetch('/api/complete-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          items,
+          subtotal,
+          discountAmount,
+          shippingCost,
+          total,
+          discountCode: appliedDiscount?.code || null,
+          region,
+          shippingAddress: address,
+          buyerId: user?.id || null,
+        }),
+      })
+      const data = await res.json()
       clearCart()
-      router.push(`/order-confirmation/${orderId}`)
-    }, 1200)
+      router.push(`/order-confirmation/${data.orderRef || 'unknown'}`)
+    } catch (err) {
+      alert('Something went wrong placing your order. Please try again.')
+      setProcessing(false)
+    }
   }
 
   if (items.length === 0) {
