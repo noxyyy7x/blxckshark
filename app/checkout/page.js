@@ -6,11 +6,13 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/context/AuthContext'
 import { REGIONS } from '@/lib/shipping'
 import { validateDiscountCode } from '@/lib/discountCodes'
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
+  const { user } = useAuth()
   const router = useRouter()
 
   const [region, setRegion] = useState('UK')
@@ -29,20 +31,23 @@ export default function CheckoutPage() {
   const discountAmount = appliedDiscount ? (subtotal * appliedDiscount.percentOff) / 100 : 0
   const total = Math.max(0, subtotal - discountAmount + shippingCost)
 
-  function handleApplyDiscount(e) {
+  async function handleApplyDiscount(e) {
     e.preventDefault()
     if (!discountInput.trim()) return
-    const result = validateDiscountCode(discountInput)
+    const result = await validateDiscountCode(discountInput, user?.id)
     if (result.valid) {
-      setAppliedDiscount({ code: discountInput.toUpperCase(), ...result })
+      setAppliedDiscount(result)
       setDiscountError('')
+    } else if (result.selfReferral) {
+      setAppliedDiscount(null)
+      setDiscountError("You can't use your own referral code.")
     } else {
       setAppliedDiscount(null)
       setDiscountError('Invalid or expired code.')
     }
   }
 
-  function handlePayNow(e) {
+  async function handlePayNow(e) {
     e.preventDefault()
     if (!email || !address.name || !address.line1 || !address.city || !address.postcode) {
       alert('Please fill in all contact and shipping fields.')
@@ -55,6 +60,26 @@ export default function CheckoutPage() {
     // On real integration: create a Revolut order via API, mount the
     // Checkout.js widget here, and only proceed to confirmation once the
     // webhook confirms payment success (not directly from the client).
+
+    // If a referral/athlete code was used, credit the referrer's commission
+    // via the server-side API route (never done client-side).
+    if (appliedDiscount?.referrerId) {
+      try {
+        await fetch('/api/credit-referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            referralCode: appliedDiscount.code,
+            orderAmount: subtotal,
+            referredEmail: email,
+            buyerId: user?.id || null,
+          }),
+        })
+      } catch {
+        // Non-blocking — don't fail the order if commission crediting has an issue
+      }
+    }
+
     setTimeout(() => {
       const orderId = `BS-${Date.now().toString().slice(-8)}`
       clearCart()
