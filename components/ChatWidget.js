@@ -9,6 +9,8 @@ export default function ChatWidget() {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [chatId, setChatId] = useState(null)
+  const [chatStatus, setChatStatus] = useState('open')
+  const [rating, setRating] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loadingChat, setLoadingChat] = useState(false)
@@ -23,22 +25,29 @@ export default function ChatWidget() {
 
       const { data: existing } = await supabase
         .from('chats')
-        .select('id')
+        .select('id, status, rating')
         .eq('user_id', user.id)
-        .eq('status', 'open')
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
 
-      let id = existing?.id
+      let id
 
-      if (!id) {
+      if (existing && existing.status === 'open') {
+        // Resume the existing open conversation
+        id = existing.id
+        setChatStatus('open')
+        setRating(existing.rating)
+      } else {
+        // No chat yet, or the last one is closed — start a fresh conversation
         const { data: created } = await supabase
           .from('chats')
           .insert({ user_id: user.id })
-          .select('id')
+          .select('id, status, rating')
           .single()
         id = created?.id
+        setChatStatus('open')
+        setRating(null)
       }
 
       setChatId(id)
@@ -66,6 +75,14 @@ export default function ChatWidget() {
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `chat_id=eq.${chatId}` },
         (payload) => setMessages((prev) => [...prev, payload.new])
       )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chats', filter: `id=eq.${chatId}` },
+        (payload) => {
+          setChatStatus(payload.new.status)
+          setRating(payload.new.rating)
+        }
+      )
       .subscribe()
 
     return () => supabase.removeChannel(channel)
@@ -88,6 +105,14 @@ export default function ChatWidget() {
       sender_role: 'customer',
       content,
     })
+  }
+
+  async function handleRate(value) {
+    setRating(value) // optimistic
+    await supabase
+      .from('chats')
+      .update({ rating: value, rated_at: new Date().toISOString() })
+      .eq('id', chatId)
   }
 
   return (
@@ -160,21 +185,53 @@ export default function ChatWidget() {
                   ))}
                 </div>
 
-                <form onSubmit={handleSend} className="flex gap-2 border-t border-white/10 p-3">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type a message..."
-                    className="font-body flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
-                  />
-                  <button
-                    type="submit"
-                    className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black"
-                  >
-                    Send
-                  </button>
-                </form>
+                {chatStatus === 'closed' ? (
+                  rating ? (
+                    <div className="border-t border-white/10 p-4 text-center">
+                      <p className="font-body text-xs text-white/50">
+                        Thanks for your feedback! 🦈
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border-t border-white/10 p-4 text-center">
+                      <p className="font-body mb-3 text-xs text-white/60">
+                        This chat has ended. How was your experience?
+                      </p>
+                      <div className="flex justify-center gap-4">
+                        <button
+                          onClick={() => handleRate('up')}
+                          aria-label="Thumbs up"
+                          className="rounded-full border border-white/15 p-3 transition-colors hover:bg-white/10"
+                        >
+                          👍
+                        </button>
+                        <button
+                          onClick={() => handleRate('down')}
+                          aria-label="Thumbs down"
+                          className="rounded-full border border-white/15 p-3 transition-colors hover:bg-white/10"
+                        >
+                          👎
+                        </button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <form onSubmit={handleSend} className="flex gap-2 border-t border-white/10 p-3">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Type a message..."
+                      className="font-body flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
+                    />
+                    <button
+                      type="submit"
+                      className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black"
+                    >
+                      Send
+                    </button>
+                  </form>
+                )}
               </>
             )}
           </motion.div>
