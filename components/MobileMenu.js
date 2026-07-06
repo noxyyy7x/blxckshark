@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const categories = ['Men', 'Women', 'Accessories']
@@ -9,6 +10,19 @@ const isLoggedIn = false
 const mockUser = { name: 'Qasim', tier: 'Red Shark', tierNumber: 3 }
 
 export default function MobileMenu({ open, onClose }) {
+  // Lock background scroll while menu is open — also prevents the
+  // underlying hero text from showing/scrolling behind the drawer
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
+
   return (
     <AnimatePresence>
       {open && (
@@ -18,7 +32,7 @@ export default function MobileMenu({ open, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/60"
+            className="fixed inset-0 z-[90] bg-black/70"
           />
 
           <motion.div
@@ -26,12 +40,10 @@ export default function MobileMenu({ open, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-0 top-0 z-50 flex h-full w-[80%] max-w-xs flex-col bg-[#0d0d0d] px-6 py-8"
+            className="fixed left-0 top-0 z-[100] isolate flex h-full w-[80%] max-w-xs flex-col bg-black px-6 py-8 shadow-2xl"
           >
             <div className="mb-8 flex items-center justify-between">
-              <span className="font-display text-lg font-bold tracking-tight">
-                BLXCKSHARK
-              </span>
+              <img src="/wordmark.svg" alt="BLXCKSHARK" className="h-6" />
               <button onClick={onClose} aria-label="Close menu" className="text-2xl leading-none">
                 ✕
               </button>
@@ -42,6 +54,7 @@ export default function MobileMenu({ open, onClose }) {
                 <a
                   key={cat}
                   href={`/shop/${cat.toLowerCase()}`}
+                  onClick={onClose}
                   className="font-body border-b border-white/10 py-4 text-base font-medium tracking-wide"
                 >
                   {cat}

@@ -4,15 +4,19 @@ import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
+import HeroSlideshow from '@/components/HeroSlideshow'
+import FeaturedSection from '@/components/FeaturedSection'
+import { QualityIcon, PerformanceIcon, ShieldIcon, GlobeIcon } from '@/components/Icons'
 
 const features = [
-  { title: 'Premium Quality', desc: 'Top tier materials', icon: '★' },
-  { title: 'Performance Driven', desc: 'Built to perform', icon: '◆' },
-  { title: 'Built Different', desc: 'Stand out. Be you.', icon: '🛡' },
-  { title: 'Worldwide Shipping', desc: 'Delivering worldwide', icon: '🌐' },
+  { title: 'Premium Quality', desc: 'Top tier materials', Icon: QualityIcon },
+  { title: 'Performance Driven', desc: 'Built to perform', Icon: PerformanceIcon },
+  { title: 'Built Different', desc: 'Stand out. Be you.', Icon: ShieldIcon },
+  { title: 'Worldwide Shipping', desc: 'Delivering worldwide', Icon: GlobeIcon },
 ]
 
-// Placeholder collection categories — real products come from admin panel later
+// TODO: pull from admin panel (Supabase "collections" table) so these can be
+// added/reordered/renamed without a code change.
 const collection = [
   { name: 'T-Shirts', tagline: 'Engineered for performance' },
   { name: 'Hoodies', tagline: 'Comfort meets style' },
@@ -35,8 +39,11 @@ export default function HomePage() {
       <Header />
 
       <main className="bg-[#0a0a0a] text-white">
-        {/* Hero */}
-        <section className="relative mx-auto flex max-w-7xl flex-col items-start justify-center gap-6 px-6 py-20 sm:py-28">
+        {/* Hero — full-bleed slideshow with text overlaid */}
+        <section className="relative flex min-h-[85vh] w-full items-center overflow-hidden">
+          <HeroSlideshow />
+
+          <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-6">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -80,23 +87,11 @@ export default function HomePage() {
             </a>
             <a
               href="/athletes"
-              className="font-body rounded-md border border-white/20 px-6 py-3 text-sm font-semibold transition-colors hover:bg-white/5"
+              className="font-body rounded-md border border-white/30 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/10"
             >
               Join The Movement
             </a>
           </motion.div>
-        </section>
-
-        {/* Features row */}
-        <section className="border-y border-white/10">
-          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-10 sm:grid-cols-4">
-            {features.map((f) => (
-              <motion.div key={f.title} {...fadeUp} className="flex flex-col gap-1">
-                <span className="mb-1 text-lg">{f.icon}</span>
-                <p className="font-body text-sm font-semibold">{f.title}</p>
-                <p className="font-body text-xs text-white/50">{f.desc}</p>
-              </motion.div>
-            ))}
           </div>
         </section>
 
@@ -133,6 +128,21 @@ export default function HomePage() {
                   <p className="font-body text-xs text-white/50">{item.tagline}</p>
                 </div>
               </motion.a>
+            ))}
+          </div>
+        </section>
+
+        <FeaturedSection />
+
+        {/* Features row */}
+        <section className="border-y border-white/10">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-10 sm:grid-cols-4">
+            {features.map((f) => (
+              <motion.div key={f.title} {...fadeUp} className="flex flex-col gap-2">
+                <f.Icon className="mb-1 h-6 w-6 text-white/70" />
+                <p className="font-body text-sm font-semibold">{f.title}</p>
+                <p className="font-body text-xs text-white/50">{f.desc}</p>
+              </motion.div>
             ))}
           </div>
         </section>

@@ -1,6 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  InstagramIcon,
+  XIcon,
+  ThreadsIcon,
+  TikTokIcon,
+  VisaIcon,
+  MastercardIcon,
+  AmexIcon,
+  ApplePayIcon,
+  GooglePayIcon,
+} from './Icons'
 
 const columns = [
   {
@@ -40,11 +51,13 @@ const columns = [
 ]
 
 const socials = [
-  { name: 'Instagram', href: 'https://instagram.com/blxckshark' },
-  { name: 'X', href: 'https://x.com/blxckshark' },
-  { name: 'Threads', href: 'https://threads.net/@blxckshark' },
-  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark' },
+  { name: 'Instagram', href: 'https://instagram.com/blxckshark', Icon: InstagramIcon },
+  { name: 'X', href: 'https://x.com/blxckshark', Icon: XIcon },
+  { name: 'Threads', href: 'https://threads.net/@blxckshark', Icon: ThreadsIcon },
+  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark', Icon: TikTokIcon },
 ]
+
+const paymentIcons = [VisaIcon, MastercardIcon, AmexIcon, ApplePayIcon, GooglePayIcon]
 
 export default function Footer() {
   const [email, setEmail] = useState('')
@@ -125,19 +138,24 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-14 flex flex-col gap-6 border-t border-white/10 pt-8">
-          <div className="flex gap-6">
+          <div className="flex gap-5">
             {socials.map((s) => (
-              <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold tracking-widest text-white/40 hover:text-white">
-                {s.name.toUpperCase()}
+              <a
+                key={s.name}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.name}
+                className="text-white/50 transition-colors hover:text-white"
+              >
+                <s.Icon className="h-5 w-5" />
               </a>
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-3 opacity-60">
-            {['VISA', 'MASTERCARD', 'AMEX', 'APPLE PAY', 'GOOGLE PAY'].map((p) => (
-              <span key={p} className="rounded border border-white/15 px-2 py-1 text-[10px] tracking-wide">
-                {p}
-              </span>
+          <div className="flex flex-wrap gap-2 opacity-70">
+            {paymentIcons.map((Icon, i) => (
+              <Icon key={i} className="h-6 w-9 text-white/70" />
             ))}
           </div>
 
