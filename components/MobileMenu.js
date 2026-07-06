@@ -2,14 +2,13 @@
 
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '@/context/AuthContext'
 
 const categories = ['Men', 'Women', 'Accessories']
 
-// TODO: replace with real Supabase auth state once accounts are built
-const isLoggedIn = false
-const mockUser = { name: 'Qasim', tier: 'Red Shark', tierNumber: 3 }
-
 export default function MobileMenu({ open, onClose }) {
+  const { user } = useAuth()
+  const isLoggedIn = !!user
   // Lock background scroll while menu is open — also prevents the
   // underlying hero text from showing/scrolling behind the drawer
   useEffect(() => {
@@ -67,13 +66,11 @@ export default function MobileMenu({ open, onClose }) {
                 <>
                   <a href="/account" className="flex items-center gap-3 rounded-lg bg-white/5 p-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-display text-sm">
-                      {mockUser.name.charAt(0)}
+                      {user.email.charAt(0).toUpperCase()}
                     </div>
                     <div className="font-body text-left">
-                      <p className="text-sm font-semibold">{mockUser.name}</p>
-                      <p className="text-xs text-white/50">
-                        Tier {mockUser.tierNumber} · {mockUser.tier}
-                      </p>
+                      <p className="text-sm font-semibold">{user.email}</p>
+                      <p className="text-xs text-white/50">View account</p>
                     </div>
                   </a>
                   <a href="/wishlist" className="font-body py-2 text-sm text-white/70">
