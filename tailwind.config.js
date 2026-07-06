@@ -4,6 +4,12 @@ module.exports = {
   content: [
     './app/**/*.{js,jsx}',
     './components/**/*.{js,jsx}',
+    './lib/**/*.{js,jsx}',
+  ],
+  safelist: [
+    { pattern: /from-(neutral|sky|red|yellow|amber|blue)-(300|400|500|600|700|800|900)/ },
+    { pattern: /via-(neutral|sky|red|yellow|amber|blue)-(300|400|500|600|700|800|900)/ },
+    { pattern: /to-(neutral|sky|red|yellow|amber|blue|black)(-(300|400|500|600|700|800|900))?/ },
   ],
   theme: {
     extend: {

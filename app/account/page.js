@@ -1,25 +1,19 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
-
-// TODO: replace with real data from Supabase "users" table once the
-// loyalty/XP system tables exist (tier, xp, athlete role, etc.)
-const mockProfile = {
-  tierName: 'White Shark',
-  tierNumber: 1,
-  xp: 120,
-  nextTierXp: 1000,
-  isAthlete: false,
-}
+import { supabase } from '@/lib/supabaseClient'
+import { getTierProgress } from '@/lib/tiers'
 
 export default function AccountPage() {
   const { user, loading, isEmailVerified, signOut } = useAuth()
   const router = useRouter()
+  const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(true)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -27,7 +21,20 @@ export default function AccountPage() {
     }
   }, [loading, user, router])
 
-  if (loading || !user) {
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        setProfile(data)
+        setProfileLoading(false)
+      })
+  }, [user])
+
+  if (loading || !user || profileLoading) {
     return (
       <>
         <NotificationBar />
@@ -40,7 +47,9 @@ export default function AccountPage() {
     )
   }
 
-  const progress = Math.min(100, (mockProfile.xp / mockProfile.nextTierXp) * 100)
+  const xp = profile?.xp ?? 0
+  const { current, next, progress } = getTierProgress(xp)
+  const isAthlete = profile?.role === 'athlete'
 
   return (
     <>
@@ -49,7 +58,6 @@ export default function AccountPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto max-w-3xl px-6 py-12">
-          {/* Email verification banner */}
           {!isEmailVerified && (
             <div className="mb-8 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
               <p className="font-body text-sm text-yellow-200">
@@ -61,21 +69,32 @@ export default function AccountPage() {
           {/* Profile header */}
           <div className="mb-10 flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 font-display text-xl">
-              {user.email.charAt(0).toUpperCase()}
+              {profile?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
+              ) : (
+                user.email.charAt(0).toUpperCase()
+              )}
             </div>
             <div>
-              <p className="font-body text-lg font-semibold">{user.email}</p>
-              {mockProfile.isAthlete && (
+              <p className="font-body text-lg font-semibold">
+                {profile?.display_name || user.email}
+              </p>
+              {isAthlete && (
                 <p className="font-body text-xs font-semibold text-white/70">🦈 BLXCKSHARK Athlete</p>
               )}
-              <p className="font-body text-sm text-white/50">
-                Tier {mockProfile.tierNumber} · {mockProfile.tierName}
-              </p>
+              <a href="/tiers" className="font-body flex items-center gap-1.5 text-sm text-white/50 underline hover:text-white">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: current.accent }}
+                />
+                Tier {current.number} · {current.name}
+              </a>
               <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-white" style={{ width: `${progress}%` }} />
+                <div className="h-full rounded-full bg-white transition-all" style={{ width: `${progress}%` }} />
               </div>
               <p className="font-body mt-1 text-xs text-white/40">
-                {mockProfile.xp} / {mockProfile.nextTierXp} XP to next tier
+                {next ? `${xp} / ${next.xpRequired} XP to ${next.name}` : `${xp} XP · Max tier reached`}
               </p>
             </div>
           </div>
