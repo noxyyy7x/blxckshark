@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { getTierForXp } from '@/lib/tiers'
+import { getTierForXp, TIERS } from '@/lib/tiers'
 
 const WEEKEND_BOOST_PERCENT = { 1: 0, 2: 10, 3: 15, 4: 25, 5: 25 }
 
@@ -55,22 +55,48 @@ export async function POST(request) {
         const orderValue = Math.max(0, subtotal - (discountAmount || 0))
         let xpAwarded = Math.round(orderValue * 10) // 10xp per £1
 
-        const currentTier = getTierForXp(profile.xp)
-        const boostPercent = WEEKEND_BOOST_PERCENT[currentTier.number] || 0
+        const tierBeforePurchase = getTierForXp(profile.xp)
+        const boostPercent = WEEKEND_BOOST_PERCENT[tierBeforePurchase.number] || 0
         if (isWeekendUK() && boostPercent > 0) {
           xpAwarded = Math.round(xpAwarded * (1 + boostPercent / 100))
         }
 
-        await supabase
-          .from('profiles')
-          .update({ xp: profile.xp + xpAwarded })
-          .eq('id', buyerId)
+        const newXp = profile.xp + xpAwarded
+
+        await supabase.from('profiles').update({ xp: newXp }).eq('id', buyerId)
 
         await supabase.from('xp_transactions').insert({
           user_id: buyerId,
           amount: xpAwarded,
           source: `Order ${orderRef}`,
         })
+
+        // Generate reward codes for any tier newly reached by this purchase
+        const tierAfterPurchase = getTierForXp(newXp)
+        const newlyReachedTiers = TIERS.filter(
+          (t) => t.number > tierBeforePurchase.number && t.number <= tierAfterPurchase.number && t.rewardAmount
+        )
+
+        for (const tier of newlyReachedTiers) {
+          const rewardCode = `BS${tier.name.replace(/\s/g, '').toUpperCase().slice(0, 4)}${Math.floor(1000 + Math.random() * 9000)}`
+          await supabase.from('user_rewards').insert({
+            user_id: buyerId,
+            tier_number: tier.number,
+            code: rewardCode,
+            amount: tier.rewardAmount,
+          })
+          // Ignore conflict errors silently (unique constraint prevents duplicates
+          // if this somehow runs twice for the same tier)
+        }
+      }
+
+      // If a tier reward code was used on this order, mark it redeemed
+      if (discountCode) {
+        await supabase
+          .from('user_rewards')
+          .update({ redeemed: true })
+          .eq('user_id', buyerId)
+          .eq('code', discountCode.toUpperCase())
       }
     }
 

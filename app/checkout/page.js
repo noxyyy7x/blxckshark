@@ -28,7 +28,11 @@ export default function CheckoutPage() {
   const freeShipping = subtotal >= regionConfig.freeShippingThreshold
   const shippingCost = freeShipping ? 0 : regionConfig.flatRate
 
-  const discountAmount = appliedDiscount ? (subtotal * appliedDiscount.percentOff) / 100 : 0
+  const discountAmount = appliedDiscount
+    ? appliedDiscount.type === 'reward'
+      ? Math.min(appliedDiscount.amountOff, subtotal)
+      : (subtotal * appliedDiscount.percentOff) / 100
+    : 0
   const total = Math.max(0, subtotal - discountAmount + shippingCost)
 
   async function handleApplyDiscount(e) {
@@ -41,6 +45,9 @@ export default function CheckoutPage() {
     } else if (result.selfReferral) {
       setAppliedDiscount(null)
       setDiscountError("You can't use your own referral code.")
+    } else if (result.alreadyRedeemed) {
+      setAppliedDiscount(null)
+      setDiscountError('This reward code has already been used.')
     } else {
       setAppliedDiscount(null)
       setDiscountError('Invalid or expired code.')
@@ -254,7 +261,7 @@ export default function CheckoutPage() {
               {discountError && <p className="font-body mt-2 text-xs text-red-400">{discountError}</p>}
               {appliedDiscount && (
                 <p className="font-body mt-2 text-xs text-white/60">
-                  &quot;{appliedDiscount.code}&quot; applied — {appliedDiscount.percentOff}% off
+                  &quot;{appliedDiscount.code}&quot; applied — {appliedDiscount.type === 'reward' ? `£${appliedDiscount.amountOff.toFixed(2)} off` : `${appliedDiscount.percentOff}% off`}
                 </p>
               )}
             </div>
@@ -305,7 +312,9 @@ export default function CheckoutPage() {
               </div>
               {appliedDiscount && (
                 <div className="flex justify-between text-white/60">
-                  <span className="font-body">Discount ({appliedDiscount.percentOff}%)</span>
+                  <span className="font-body">
+                    Discount {appliedDiscount.type === 'reward' ? '' : `(${appliedDiscount.percentOff}%)`}
+                  </span>
                   <span className="font-body">−£{discountAmount.toFixed(2)}</span>
                 </div>
               )}
