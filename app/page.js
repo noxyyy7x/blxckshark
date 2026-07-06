@@ -35,7 +35,7 @@ export default function ComingSoonPage() {
       />
 
       {/* Rotating badge ring around the icon */}
-      <div className="relative mb-10 flex h-28 w-28 items-center justify-center">
+      <div className="relative mb-10 flex h-32 w-32 items-center justify-center">
         <motion.svg
           viewBox="0 0 100 100"
           className="absolute inset-0 h-full w-full"
@@ -45,7 +45,7 @@ export default function ComingSoonPage() {
           <defs>
             <path
               id="circlePath"
-              d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"
+              d="M 50, 50 m -42, 0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"
               fill="none"
             />
           </defs>
@@ -59,7 +59,7 @@ export default function ComingSoonPage() {
         <motion.img
           src="/logo-icon.svg"
           alt="BLXCKSHARK"
-          className="relative z-10 h-11 w-11"
+          className="relative z-10 h-20 w-20 drop-shadow-[0_0_18px_rgba(255,255,255,0.35)]"
           initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
