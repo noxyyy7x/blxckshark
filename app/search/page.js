@@ -1,0 +1,53 @@
+'use client'
+
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import NotificationBar from '@/components/NotificationBar'
+import ProductCard from '@/components/ProductCard'
+import { searchProducts } from '@/lib/products'
+
+function SearchResults() {
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q') || ''
+  const results = searchProducts(query)
+
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-12">
+      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
+        Search Results
+      </h1>
+      <p className="font-body mb-8 text-sm text-white/50">
+        {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;
+      </p>
+
+      {results.length === 0 ? (
+        <p className="font-body py-16 text-center text-sm text-white/40">
+          No products found. Try a different search term.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          {results.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <>
+      <NotificationBar />
+      <Header />
+      <main className="min-h-screen bg-[#0a0a0a] text-white">
+        <Suspense fallback={<div className="px-6 py-12 text-sm text-white/40">Loading...</div>}>
+          <SearchResults />
+        </Suspense>
+      </main>
+      <Footer />
+    </>
+  )
+}

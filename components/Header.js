@@ -1,14 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import MobileMenu from './MobileMenu'
+import { useCart } from '@/context/CartContext'
 
 const categories = ['Men', 'Women', 'Accessories']
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const router = useRouter()
+  const { itemCount } = useCart()
+
+  function handleSearchSubmit(e) {
+    e.preventDefault()
+    if (!query.trim()) return
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+    setSearchOpen(false)
+    setQuery('')
+  }
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0a0a]">
@@ -51,6 +64,7 @@ export default function Header() {
           </a>
           <a href="/cart" aria-label="Cart" className="relative">
             <CartIcon />
+            {itemCount > 0 && <CartBadge count={itemCount} />}
           </a>
           <a href="/account" aria-label="Account">
             <UserIcon />
@@ -65,8 +79,9 @@ export default function Header() {
           <a href="/account" aria-label="Account">
             <UserIcon />
           </a>
-          <a href="/cart" aria-label="Cart">
+          <a href="/cart" aria-label="Cart" className="relative">
             <CartIcon />
+            {itemCount > 0 && <CartBadge count={itemCount} />}
           </a>
         </div>
       </div>
@@ -81,20 +96,30 @@ export default function Header() {
             transition={{ duration: 0.25 }}
             className="overflow-hidden border-t border-white/10"
           >
-            <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+            <form onSubmit={handleSearchSubmit} className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
               <input
                 autoFocus
                 type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search products..."
                 className="font-body w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none placeholder:text-white/40"
               />
-            </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
 
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
+  )
+}
+
+function CartBadge({ count }) {
+  return (
+    <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-bold text-black">
+      {count > 9 ? '9+' : count}
+    </span>
   )
 }
 

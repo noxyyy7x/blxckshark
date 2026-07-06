@@ -35,6 +35,20 @@ export function GlobeIcon(props) {
   )
 }
 
+export function HeartIconOutline({ filled, ...props }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.6"
+      {...props}
+    >
+      <path d="M12 21s-7.5-4.6-10-9.3C.5 8.4 2.4 5 6 5c2 0 3.5 1 6 3.5C14.5 6 16 5 18 5c3.6 0 5.5 3.4 4 6.7C19.5 16.4 12 21 12 21Z" />
+    </svg>
+  )
+}
+
 // --- Socials ---
 
 export function InstagramIcon(props) {
