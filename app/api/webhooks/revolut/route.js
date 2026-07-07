@@ -40,6 +40,8 @@ export async function POST(request) {
     const supabase = getSupabaseAdmin()
     const orderRef = event.merchant_order_ext_ref
 
+    console.log('Looking for order_ref:', JSON.stringify(orderRef), 'length:', orderRef?.length)
+
     const { data: order } = await supabase
       .from('orders')
       .select('*')
@@ -47,6 +49,16 @@ export async function POST(request) {
       .maybeSingle()
 
     console.log('Order lookup result:', order ? `found, status=${order.status}` : 'NOT FOUND')
+
+    if (!order) {
+      // Diagnostic: show recent orders so we can compare formats
+      const { data: recent } = await supabase
+        .from('orders')
+        .select('order_ref, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      console.log('Recent orders in DB:', JSON.stringify(recent?.map((o) => o.order_ref)))
+    }
 
     // Idempotency: only fulfill once, even if Revolut sends this event twice
     if (order && order.status === 'pending_payment') {
