@@ -15,7 +15,7 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     if (loading) return
     if (!user) {
-      router.push('/login')
+      router.push('/admin/login')
       return
     }
     getStaffProfile(user.id).then((profile) => {
