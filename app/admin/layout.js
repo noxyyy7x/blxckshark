@@ -36,8 +36,8 @@ export default function AdminLayout({ children }) {
     )
   }
 
-  const visibleSections = ADMIN_SECTIONS.filter(
-    (s) => staff.is_owner || staff.permissions?.[s.key]
+  const visibleSections = ADMIN_SECTIONS.filter((s) =>
+    s.ownerOnly ? staff.is_owner : staff.is_owner || staff.permissions?.[s.key]
   )
 
   return (

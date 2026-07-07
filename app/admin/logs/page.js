@@ -14,6 +14,9 @@ const ACTION_LABELS = {
   discount_code_deactivated: 'Deactivated a discount code',
   cashout_approved: 'Approved a cashout (generated discount code)',
   cashout_rejected: 'Rejected a cashout request',
+  staff_created: 'Created a staff account',
+  staff_permissions_updated: 'Updated staff permissions',
+  staff_removed: 'Removed a staff account',
 }
 
 export default function AdminLogsPage() {
