@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
@@ -10,43 +9,56 @@ import SizeGuideModal from '@/components/SizeGuideModal'
 import Accordion from '@/components/Accordion'
 import { HeartIconOutline } from '@/components/Icons'
 import { useCart } from '@/context/CartContext'
-import { getRelatedProducts } from '@/lib/products'
+import { getUniqueSizes, getUniqueColors, isInStock } from '@/lib/products'
+import { getColorSwatch } from '@/lib/colorSwatches'
 
 const FREE_SHIPPING_THRESHOLD_GBP = 50
 
-export default function ProductDetailClient({ product }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] || null)
-  const [selectedSize, setSelectedSize] = useState(null)
+export default function ProductDetailClient({ product, related }) {
+  const sizes = getUniqueSizes(product)
+  const colors = getUniqueColors(product)
+  const productInStock = isInStock(product)
+
+  const [selectedColor, setSelectedColor] = useState(colors[0] || null)
+  const [selectedSize, setSelectedSize] = useState(sizes[0] || null)
   const [quantity, setQuantity] = useState(1)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const [wishlisted, setWishlisted] = useState(false)
   const [addedMessage, setAddedMessage] = useState(false)
 
   const { addItem } = useCart()
-  const related = getRelatedProducts(product)
+
+  const selectedVariant = product.variants?.find(
+    (v) => (sizes.length === 0 || v.size === selectedSize) && v.color === selectedColor
+  )
+  const selectedVariantInStock = selectedVariant ? Number(selectedVariant.stock) > 0 : productInStock
 
   function handleAddToCart() {
-    if (product.sizes.length > 0 && !selectedSize) {
+    if (sizes.length > 0 && !selectedSize) {
       alert('Please select a size first.')
+      return
+    }
+    if (!selectedVariantInStock) {
+      alert('That size/color combination is out of stock.')
       return
     }
     addItem({
       productId: product.id,
       name: product.name,
-      price: product.price.gbp,
+      price: product.price_gbp,
       size: selectedSize,
       color: selectedColor,
       quantity,
-      image: null,
+      image: product.images?.[0] || null,
     })
     setAddedMessage(true)
     setTimeout(() => setAddedMessage(false), 2000)
   }
 
   const accordionItems = [
-    { title: 'Description', content: product.description },
-    { title: 'Fabric', content: product.fabric },
-    { title: 'Care Instructions', content: product.care },
+    { title: 'Description', content: product.description || 'No description yet.' },
+    { title: 'Fabric', content: product.fabric || 'Details coming soon.' },
+    { title: 'Care Instructions', content: product.care || 'Details coming soon.' },
   ]
 
   return (
@@ -59,16 +71,29 @@ export default function ProductDetailClient({ product }) {
           {/* Image gallery */}
           <div>
             <div className="aspect-[4/5] w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
-              <div className="flex h-full w-full items-center justify-center text-xs text-white/20">
-                Product image coming soon
-              </div>
+              {product.images?.[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs text-white/20">
+                  Product image coming soon
+                </div>
+              )}
             </div>
+            {product.images?.length > 1 && (
+              <div className="mt-3 grid grid-cols-4 gap-3">
+                {product.images.slice(1).map((img, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={i} src={img} alt="" className="aspect-square rounded-lg border border-white/10 object-cover" />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product info */}
           <div className="flex flex-col gap-6">
             <div>
-              {!product.inStock && (
+              {!productInStock && (
                 <span className="mb-2 inline-block rounded bg-white/10 px-2 py-1 text-[11px] font-semibold tracking-wide text-white/60">
                   OUT OF STOCK
                 </span>
@@ -76,27 +101,31 @@ export default function ProductDetailClient({ product }) {
               <h1 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">
                 {product.name}
               </h1>
-              {product.fitTags.length > 0 && (
-                <p className="font-body mt-1 text-sm text-white/40">{product.fitTags.join(' · ')}</p>
+              {product.fit_tags?.length > 0 && (
+                <p className="font-body mt-1 text-sm text-white/40">{product.fit_tags.join(' · ')}</p>
               )}
-              <p className="font-body mt-3 text-2xl font-semibold">£{product.price.gbp.toFixed(2)}</p>
+              <p className="font-body mt-3 text-2xl font-semibold">£{Number(product.price_gbp).toFixed(2)}</p>
             </div>
 
             {/* Color selector */}
-            {product.colors.length > 0 && (
+            {colors.length > 0 && (
               <div>
                 <p className="font-body mb-2 text-xs font-semibold tracking-wide text-white/50">COLOR</p>
-                <div className="flex gap-2">
-                  {product.colors.map((color) => (
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`font-body rounded-md border px-4 py-2 text-xs transition-colors ${
+                      className={`font-body flex items-center gap-2 rounded-md border px-4 py-2 text-xs transition-colors ${
                         selectedColor === color
                           ? 'border-white bg-white text-black'
                           : 'border-white/20 text-white/70 hover:border-white/50'
                       }`}
                     >
+                      <span
+                        className="h-3 w-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: getColorSwatch(color) }}
+                      />
                       {color}
                     </button>
                   ))}
@@ -105,7 +134,7 @@ export default function ProductDetailClient({ product }) {
             )}
 
             {/* Size selector */}
-            {product.sizes.length > 0 && (
+            {sizes.length > 0 && (
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <p className="font-body text-xs font-semibold tracking-wide text-white/50">SIZE</p>
@@ -117,11 +146,11 @@ export default function ProductDetailClient({ product }) {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
+                  {sizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`font-body h-10 w-10 rounded-md border text-xs transition-colors ${
+                      className={`font-body h-10 min-w-[2.5rem] rounded-md border px-2 text-xs transition-colors ${
                         selectedSize === size
                           ? 'border-white bg-white text-black'
                           : 'border-white/20 text-white/70 hover:border-white/50'
@@ -156,10 +185,10 @@ export default function ProductDetailClient({ product }) {
 
               <button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={!productInStock}
                 className="font-body flex-1 rounded-md bg-white py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {product.inStock ? (addedMessage ? 'Added ✓' : 'Add to Cart') : 'Out of Stock'}
+                {productInStock ? (addedMessage ? 'Added ✓' : 'Add to Cart') : 'Out of Stock'}
               </button>
 
               <button
@@ -171,17 +200,14 @@ export default function ProductDetailClient({ product }) {
               </button>
             </div>
 
-            {/* Free shipping reminder */}
             <p className="font-body text-xs text-white/40">
               Free UK shipping on orders over £{FREE_SHIPPING_THRESHOLD_GBP}
             </p>
 
-            {/* Description accordion */}
             <Accordion items={accordionItems} />
           </div>
         </div>
 
-        {/* Reviews placeholder */}
         <section className="mx-auto max-w-7xl px-6 py-14">
           <h2 className="font-display mb-4 text-xl font-bold uppercase tracking-tight">Reviews</h2>
           <p className="font-body text-sm text-white/40">
@@ -189,7 +215,6 @@ export default function ProductDetailClient({ product }) {
           </p>
         </section>
 
-        {/* Related products */}
         {related.length > 0 && (
           <section className="mx-auto max-w-7xl border-t border-white/10 px-6 py-14">
             <h2 className="font-display mb-6 text-xl font-bold uppercase tracking-tight">

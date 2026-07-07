@@ -4,8 +4,10 @@ import NotificationBar from '@/components/NotificationBar'
 import ShopGrid from '@/components/ShopGrid'
 import { getAllProducts } from '@/lib/products'
 
-export default function ShopPage() {
-  const products = getAllProducts()
+export const dynamic = 'force-dynamic'
+
+export default async function ShopPage() {
+  const products = await getAllProducts()
 
   return (
     <>

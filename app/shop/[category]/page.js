@@ -3,17 +3,22 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import ShopGrid from '@/components/ShopGrid'
-import { getProductsByCategory, CATEGORIES } from '@/lib/products'
+import { getProductsByCategory } from '@/lib/products'
+import { GENDERS } from '@/lib/categories'
 
-export default function CategoryPage({ params }) {
-  const categoryParam = params.category
-  const matchedCategory = CATEGORIES.find(
+export const dynamic = 'force-dynamic'
+
+export default async function CategoryPage({ params }) {
+  const categoryParam = params?.category
+  if (!categoryParam) notFound()
+
+  const matchedCategory = GENDERS.find(
     (c) => c.toLowerCase() === categoryParam.toLowerCase()
   )
 
   if (!matchedCategory) notFound()
 
-  const products = getProductsByCategory(matchedCategory)
+  const products = await getProductsByCategory(matchedCategory)
 
   return (
     <>

@@ -1,11 +1,22 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import ProductCard from './ProductCard'
 import { getFeaturedProducts } from '@/lib/products'
 
 export default function FeaturedSection() {
-  const featuredProducts = getFeaturedProducts()
+  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getFeaturedProducts().then((data) => {
+      setFeaturedProducts(data)
+      setLoading(false)
+    })
+  }, [])
+
+  if (!loading && featuredProducts.length === 0) return null
 
   return (
     <section className="border-t border-white/10 bg-[#0d0d0d] py-20">
@@ -36,11 +47,15 @@ export default function FeaturedSection() {
           </a>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {featuredProducts.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="font-body text-sm text-white/30">Loading...</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {featuredProducts.map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i} />
+            ))}
+          </div>
+        )}
 
         <a href="/shop" className="font-body mt-8 block text-center text-sm text-white/60 hover:text-white sm:hidden">
           View all →

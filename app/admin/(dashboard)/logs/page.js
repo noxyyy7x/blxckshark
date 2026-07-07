@@ -17,6 +17,9 @@ const ACTION_LABELS = {
   staff_created: 'Created a staff account',
   staff_permissions_updated: 'Updated staff permissions',
   staff_removed: 'Removed a staff account',
+  product_created: 'Created a product',
+  product_updated: 'Updated a product',
+  product_deleted: 'Deleted a product',
 }
 
 export default function AdminLogsPage() {

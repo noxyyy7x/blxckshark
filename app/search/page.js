@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -11,7 +11,16 @@ import { searchProducts } from '@/lib/products'
 function SearchResults() {
   const searchParams = useSearchParams()
   const query = searchParams.get('q') || ''
-  const results = searchProducts(query)
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    searchProducts(query).then((data) => {
+      setResults(data)
+      setLoading(false)
+    })
+  }, [query])
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
@@ -19,10 +28,10 @@ function SearchResults() {
         Search Results
       </h1>
       <p className="font-body mb-8 text-sm text-white/50">
-        {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;
+        {loading ? 'Searching...' : `${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`}
       </p>
 
-      {results.length === 0 ? (
+      {!loading && results.length === 0 ? (
         <p className="font-body py-16 text-center text-sm text-white/40">
           No products found. Try a different search term.
         </p>

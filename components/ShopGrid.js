@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import ProductCard from './ProductCard'
-import { FIT_TAGS, SIZES } from '@/lib/products'
+import { FIT_TAGS } from '@/lib/categories'
+import { SIZE_SETS } from '@/lib/productSizes'
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
@@ -20,15 +21,15 @@ export default function ShopGrid({ products, title }) {
     let result = [...products]
 
     if (fitFilter) {
-      result = result.filter((p) => p.fitTags.includes(fitFilter))
+      result = result.filter((p) => p.fit_tags?.includes(fitFilter))
     }
     if (sizeFilter) {
-      result = result.filter((p) => p.sizes.includes(sizeFilter))
+      result = result.filter((p) => p.variants?.some((v) => v.size === sizeFilter))
     }
     if (sort === 'price-asc') {
-      result.sort((a, b) => a.price.gbp - b.price.gbp)
+      result.sort((a, b) => a.price_gbp - b.price_gbp)
     } else if (sort === 'price-desc') {
-      result.sort((a, b) => b.price.gbp - a.price.gbp)
+      result.sort((a, b) => b.price_gbp - a.price_gbp)
     }
 
     return result
@@ -45,7 +46,6 @@ export default function ShopGrid({ products, title }) {
         {title}
       </motion.h1>
 
-      {/* Filters + sort */}
       <div className="mb-8 flex flex-wrap items-center gap-3 border-b border-white/10 pb-6">
         <select
           value={fitFilter}
@@ -64,7 +64,7 @@ export default function ShopGrid({ products, title }) {
           className="font-body rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs outline-none"
         >
           <option value="">All Sizes</option>
-          {SIZES.map((s) => (
+          {SIZE_SETS.apparel.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
