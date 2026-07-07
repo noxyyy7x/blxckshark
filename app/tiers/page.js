@@ -83,8 +83,7 @@ export default function TiersPage() {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          style={{ scrollPaddingLeft: '6vw', scrollPaddingRight: '6vw' }}
-          className="flex snap-x snap-mandatory gap-5 overflow-x-auto px-[6vw] pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-center sm:px-12"
+          className="flex gap-5 overflow-x-auto px-[6vw] pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-12"
         >
           {TIERS.map((tier) => {
             const isCurrent = userXp !== null && tier.number === [...TIERS].reverse().find((t) => userXp >= t.xpRequired)?.number

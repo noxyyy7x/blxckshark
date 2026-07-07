@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 export default function TierCard({ tier, isCurrent }) {
   return (
     <div
-      className={`relative flex h-[520px] w-[85vw] max-w-sm flex-shrink-0 snap-center flex-col overflow-hidden rounded-2xl bg-gradient-to-b ${tier.gradient} sm:w-[380px]`}
+      className={`relative flex h-[780px] w-[90vw] max-w-md flex-shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-b ${tier.gradient} sm:w-[440px]`}
     >
       {/* Current tier indicator */}
       {isCurrent && (
@@ -19,30 +19,25 @@ export default function TierCard({ tier, isCurrent }) {
         {tier.number}
       </span>
 
-      <div className="relative z-10 flex flex-1 flex-col items-center px-6 pt-14 text-center">
+      <div className="relative z-10 flex flex-1 flex-col items-center px-6 pt-10 text-center">
         <p className="font-body mb-1 text-xs font-semibold tracking-[0.25em] text-white/70">
           TIER {tier.number}
         </p>
-        <h3 className="font-display mb-6 text-3xl font-bold uppercase tracking-tight text-white">
+        <h3 className="font-display mb-4 text-3xl font-bold uppercase tracking-tight text-white">
           {tier.name}
         </h3>
 
-        {/* Icon badge — placeholder circle until real tier icon artwork is added */}
-        <motion.div
+        {/* Tier icon — sits directly on the gradient, no frame */}
+        <motion.img
+          src={tier.icon}
+          alt={tier.name}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 flex h-32 w-32 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm"
-        >
-          {tier.icon ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={tier.icon} alt={tier.name} className="h-20 w-20 object-contain" />
-          ) : (
-            <span className="font-body text-[10px] text-white/50">Icon coming soon</span>
-          )}
-        </motion.div>
+          className="mb-4 h-96 w-96 object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+        />
 
-        <p className="font-body mb-6 text-xs text-white/70">
+        <p className="font-body mb-4 text-xs text-white/70">
           {tier.xpRequired.toLocaleString()} XP required
         </p>
       </div>
