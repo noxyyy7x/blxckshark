@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -10,10 +10,14 @@ import { useAuth } from '@/context/AuthContext'
 import { REGIONS } from '@/lib/shipping'
 import { validateDiscountCode } from '@/lib/discountCodes'
 
+const REVOLUT_MODE = process.env.NEXT_PUBLIC_REVOLUT_MODE || 'prod'
+
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
   const { user } = useAuth()
   const router = useRouter()
+  const widgetRef = useRef(null)
+  const pendingOrderRefRef = useRef(null)
 
   const [region, setRegion] = useState('UK')
   const [regionAutoDetected, setRegionAutoDetected] = useState(false)
@@ -25,15 +29,18 @@ export default function CheckoutPage() {
         setRegion(data.region)
         setRegionAutoDetected(true)
       })
-      .catch(() => {}) // silently keep UK default if this fails
+      .catch(() => {})
   }, [])
+
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState({ name: '', line1: '', city: '', postcode: '' })
   const [discountInput, setDiscountInput] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState(null)
   const [discountError, setDiscountError] = useState('')
   const [wantsAccount, setWantsAccount] = useState(true)
-  const [processing, setProcessing] = useState(false)
+  const [paymentStarted, setPaymentStarted] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
+  const [widgetLoading, setWidgetLoading] = useState(false)
 
   const regionConfig = REGIONS[region]
   const freeShipping = subtotal >= regionConfig.freeShippingThreshold
@@ -65,65 +72,67 @@ export default function CheckoutPage() {
     }
   }
 
-  async function handlePayNow(e) {
+  function validateFields() {
+    return email && address.name && address.line1 && address.city && address.postcode
+  }
+
+  async function handleContinueToPayment(e) {
     e.preventDefault()
-    if (!email || !address.name || !address.line1 || !address.city || !address.postcode) {
+    if (!validateFields()) {
       alert('Please fill in all contact and shipping fields.')
       return
     }
+    setPaymentStarted(true)
+    setPaymentError('')
+    setWidgetLoading(true)
 
-    setProcessing(true)
+    const { default: RevolutCheckout } = await import('@revolut/checkout')
 
-    // MOCK PAYMENT — TODO: replace with real embedded Revolut Checkout.js.
-    // On real integration: create a Revolut order via API, mount the
-    // Checkout.js widget here, and only proceed to confirmation once the
-    // webhook confirms payment success (not directly from the client).
-
-    // Credit referrer commission first (independent of order creation)
-    if (appliedDiscount?.referrerId) {
-      try {
-        await fetch('/api/credit-referral', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            referralCode: appliedDiscount.code,
-            orderAmount: subtotal,
-            referredEmail: email,
-            buyerId: user?.id || null,
-          }),
-        })
-      } catch {
-        // Non-blocking
-      }
-    }
-
-    // MOCK PAYMENT — TODO: replace with real embedded Revolut Checkout.js.
-    // On real integration: create the Revolut order, mount Checkout.js, and
-    // only call /api/complete-order once the Revolut webhook confirms
-    // payment success server-side (not directly from the client like this).
     try {
-      const res = await fetch('/api/complete-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          items,
-          subtotal,
-          discountAmount,
-          shippingCost,
-          total,
-          discountCode: appliedDiscount?.code || null,
-          region,
-          shippingAddress: address,
-          buyerId: user?.id || null,
-        }),
+      await RevolutCheckout.embeddedCheckout({
+        publicToken: process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY,
+        mode: REVOLUT_MODE,
+        locale: 'auto',
+        target: widgetRef.current,
+        email,
+        createOrder: async () => {
+          const res = await fetch('/api/create-payment-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              items,
+              subtotal,
+              discountAmount,
+              shippingCost,
+              total,
+              discountCode: appliedDiscount?.code || null,
+              referrerId: appliedDiscount?.referrerId || null,
+              region,
+              shippingAddress: address,
+              buyerId: user?.id || null,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || 'Could not start payment')
+          pendingOrderRefRef.current = data.orderRef
+          return { publicId: data.token }
+        },
+        onSuccess: () => {
+          clearCart()
+          router.push(`/order-confirmation/${pendingOrderRefRef.current}`)
+        },
+        onError: (payload) => {
+          setPaymentError(payload?.error?.message || 'Payment failed. Please try again.')
+        },
+        onCancel: () => {
+          // Let them try again without losing their form details
+        },
       })
-      const data = await res.json()
-      clearCart()
-      router.push(`/order-confirmation/${data.orderRef || 'unknown'}`)
+      setWidgetLoading(false)
     } catch (err) {
-      alert('Something went wrong placing your order. Please try again.')
-      setProcessing(false)
+      setPaymentError(err.message)
+      setWidgetLoading(false)
     }
   }
 
@@ -153,7 +162,7 @@ export default function CheckoutPage() {
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-12 lg:grid-cols-[1.3fr_1fr]">
           {/* Left: form */}
-          <form onSubmit={handlePayNow} className="flex flex-col gap-8">
+          <form onSubmit={handleContinueToPayment} className="flex flex-col gap-8">
             <h1 className="font-display text-2xl font-bold uppercase tracking-tight">Checkout</h1>
 
             {/* Region selector */}
@@ -164,7 +173,8 @@ export default function CheckoutPage() {
               <select
                 value={region}
                 onChange={(e) => { setRegion(e.target.value); setRegionAutoDetected(false) }}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none"
+                disabled={paymentStarted}
+                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none disabled:opacity-50"
               >
                 {Object.entries(REGIONS).map(([key, r]) => (
                   <option key={key} value={key}>{r.label}</option>
@@ -181,10 +191,11 @@ export default function CheckoutPage() {
               <input
                 type="email"
                 required
+                disabled={paymentStarted}
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
               />
             </div>
 
@@ -195,35 +206,39 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
+                  disabled={paymentStarted}
                   placeholder="Full name"
                   value={address.name}
                   onChange={(e) => setAddress({ ...address, name: e.target.value })}
-                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
                 />
                 <input
                   type="text"
                   required
+                  disabled={paymentStarted}
                   placeholder="Address line 1"
                   value={address.line1}
                   onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="text"
                     required
+                    disabled={paymentStarted}
                     placeholder="City"
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
                   />
                   <input
                     type="text"
                     required
+                    disabled={paymentStarted}
                     placeholder="Postcode"
                     value={address.postcode}
                     onChange={(e) => setAddress({ ...address, postcode: e.target.value })}
-                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -251,22 +266,24 @@ export default function CheckoutPage() {
                   placeholder="Enter code"
                   value={discountInput}
                   onChange={(e) => setDiscountInput(e.target.value)}
-                  disabled={!!appliedDiscount}
+                  disabled={!!appliedDiscount || paymentStarted}
                   className="font-body flex-1 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm uppercase outline-none placeholder:text-white/40 placeholder:normal-case disabled:opacity-50"
                 />
                 {appliedDiscount ? (
                   <button
                     type="button"
+                    disabled={paymentStarted}
                     onClick={() => { setAppliedDiscount(null); setDiscountInput(''); setDiscountError('') }}
-                    className="font-body rounded-md border border-white/20 px-4 py-3 text-sm"
+                    className="font-body rounded-md border border-white/20 px-4 py-3 text-sm disabled:opacity-50"
                   >
                     Remove
                   </button>
                 ) : (
                   <button
                     type="button"
+                    disabled={paymentStarted}
                     onClick={handleApplyDiscount}
-                    className="font-body rounded-md bg-white px-4 py-3 text-sm font-semibold text-black"
+                    className="font-body rounded-md bg-white px-4 py-3 text-sm font-semibold text-black disabled:opacity-50"
                   >
                     Apply
                   </button>
@@ -280,30 +297,42 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* Guest signup incentive */}
-            <label className="flex items-start gap-3 rounded-md border border-white/15 bg-white/5 px-4 py-3">
-              <input
-                type="checkbox"
-                checked={wantsAccount}
-                onChange={(e) => setWantsAccount(e.target.checked)}
-                className="mt-1"
-              />
-              <span className="font-body text-sm text-white/70">
-                Create an account to earn <strong className="text-white">150 XP</strong> and track this order.
-              </span>
-            </label>
+            {!user && (
+              <label className="flex items-start gap-3 rounded-md border border-white/15 bg-white/5 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={wantsAccount}
+                  onChange={(e) => setWantsAccount(e.target.checked)}
+                  className="mt-1"
+                />
+                <span className="font-body text-sm text-white/70">
+                  Create an account to earn <strong className="text-white">150 XP</strong> and track this order.
+                </span>
+              </label>
+            )}
 
-            <button
-              type="submit"
-              disabled={processing}
-              className="font-body rounded-md bg-white py-4 text-sm font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.98] disabled:opacity-60"
-            >
-              {processing ? 'Processing...' : `Pay ${regionConfig.symbol}${total.toFixed(2)}`}
-            </button>
-
-            <p className="font-body text-center text-[11px] text-white/30">
-              Mock payment — real Revolut Checkout will replace this button.
-            </p>
+            {!paymentStarted ? (
+              <button
+                type="submit"
+                className="font-body rounded-md bg-white py-4 text-sm font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.98]"
+              >
+                Continue to Payment
+              </button>
+            ) : (
+              <div>
+                <p className="font-body mb-3 text-sm font-semibold">
+                  Pay {regionConfig.symbol}{total.toFixed(2)}
+                </p>
+                {widgetLoading && (
+                  <p className="font-body mb-2 text-xs text-white/40">Loading payment form...</p>
+                )}
+                {paymentError && (
+                  <p className="font-body mb-2 text-xs text-red-400">{paymentError}</p>
+                )}
+                {/* Revolut's embedded card/wallet payment form mounts here */}
+                <div ref={widgetRef} />
+              </div>
+            )}
           </form>
 
           {/* Right: order summary */}
