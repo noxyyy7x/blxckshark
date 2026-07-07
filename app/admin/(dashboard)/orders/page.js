@@ -74,6 +74,14 @@ export default function AdminOrdersPage() {
       trackingNumber: trackingNumber || undefined,
     })
 
+    if (status === 'dispatched' && order?.order_ref) {
+      fetch('/api/admin/send-dispatch-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderRef: order.order_ref }),
+      }).catch(() => {}) // non-blocking — status update already succeeded either way
+    }
+
     await loadOrders()
   }
 
@@ -246,7 +254,7 @@ export default function AdminOrdersPage() {
                   </button>
                 ))}
               </div>
-              {/* TODO: trigger Resend dispatch email here once real emails are wired up */}
+              {/* Dispatch email sends automatically when status is set to Dispatched */}
             </div>
           </div>
         )}
