@@ -34,11 +34,11 @@ export async function POST(request) {
   }
 
   const event = JSON.parse(rawBody)
-  console.log('Revolut webhook received:', event.event, event.merchant_order_ext_ref)
+  const orderRef = event.merchant_order_data?.reference || event.merchant_order_ext_ref
+  console.log('Revolut webhook received:', event.event, orderRef)
 
   if (event.event === 'ORDER_COMPLETED') {
     const supabase = getSupabaseAdmin()
-    const orderRef = event.merchant_order_ext_ref
 
     console.log('Looking for order_ref:', JSON.stringify(orderRef), 'length:', orderRef?.length)
 
