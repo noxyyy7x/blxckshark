@@ -87,6 +87,13 @@ export async function POST(request) {
           })
           // Ignore conflict errors silently (unique constraint prevents duplicates
           // if this somehow runs twice for the same tier)
+
+          await supabase.from('messages').insert({
+            user_id: buyerId,
+            title: `You've reached ${tier.name}! 🦈`,
+            body: `Congratulations — you've unlocked a £${tier.rewardAmount} reward for reaching Tier ${tier.number}.`,
+            code: rewardCode,
+          })
         }
       }
 

@@ -20,6 +20,7 @@ const ACTION_LABELS = {
   product_created: 'Created a product',
   product_updated: 'Updated a product',
   product_deleted: 'Deleted a product',
+  broadcast_sent: 'Sent a broadcast message',
 }
 
 export default function AdminLogsPage() {

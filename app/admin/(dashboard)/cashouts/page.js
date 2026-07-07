@@ -68,6 +68,13 @@ export default function AdminCashoutsPage() {
       code,
     })
 
+    await supabase.from('messages').insert({
+      user_id: request.user_id,
+      title: 'Your redemption is ready',
+      body: `Your £${Number(request.amount).toFixed(2)} referral balance has been converted into a discount code.`,
+      code,
+    })
+
     setGeneratedCode({ email: request.profiles?.email, code, amount: request.amount })
     setProcessingId(null)
     loadRequests()

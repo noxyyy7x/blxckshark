@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import MobileMenu from './MobileMenu'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
 
 const categories = ['Men', 'Women', 'Accessories']
 
@@ -14,6 +16,36 @@ export default function Header() {
   const [query, setQuery] = useState('')
   const router = useRouter()
   const { itemCount } = useCart()
+  const { user } = useAuth()
+  const [hasUnread, setHasUnread] = useState(false)
+
+  useEffect(() => {
+    if (!user) {
+      setHasUnread(false)
+      return
+    }
+
+    async function checkUnread() {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_seen_messages_at')
+        .eq('id', user.id)
+        .single()
+
+      const lastSeen = profile?.last_seen_messages_at || new Date(0).toISOString()
+      const now = new Date().toISOString()
+
+      const { count } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .or(`user_id.eq.${user.id},user_id.is.null`)
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
+        .gt('created_at', lastSeen)
+
+      setHasUnread((count || 0) > 0)
+    }
+    checkUnread()
+  }, [user])
 
   function handleSearchSubmit(e) {
     e.preventDefault()
@@ -62,6 +94,12 @@ export default function Header() {
           <a href="/wishlist" aria-label="Wishlist">
             <HeartIcon />
           </a>
+          <a href="/messages" aria-label="Messages" className="relative">
+            <MessageIcon />
+            {hasUnread && (
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-white ring-2 ring-[#0a0a0a]" />
+            )}
+          </a>
           <a href="/cart" aria-label="Cart" className="relative">
             <CartIcon />
             {itemCount > 0 && <CartBadge count={itemCount} />}
@@ -73,8 +111,11 @@ export default function Header() {
 
         {/* Mobile: right icons */}
         <div className="flex items-center gap-4 md:hidden">
-          <a href="/messages" aria-label="Messages">
+          <a href="/messages" aria-label="Messages" className="relative">
             <MessageIcon />
+            {hasUnread && (
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-white ring-2 ring-[#0a0a0a]" />
+            )}
           </a>
           <a href="/account" aria-label="Account">
             <UserIcon />
