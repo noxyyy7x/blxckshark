@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -16,6 +16,17 @@ export default function CheckoutPage() {
   const router = useRouter()
 
   const [region, setRegion] = useState('UK')
+  const [regionAutoDetected, setRegionAutoDetected] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/detect-region')
+      .then((res) => res.json())
+      .then((data) => {
+        setRegion(data.region)
+        setRegionAutoDetected(true)
+      })
+      .catch(() => {}) // silently keep UK default if this fails
+  }, [])
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState({ name: '', line1: '', city: '', postcode: '' })
   const [discountInput, setDiscountInput] = useState('')
@@ -152,13 +163,16 @@ export default function CheckoutPage() {
               </label>
               <select
                 value={region}
-                onChange={(e) => setRegion(e.target.value)}
+                onChange={(e) => { setRegion(e.target.value); setRegionAutoDetected(false) }}
                 className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none"
               >
                 {Object.entries(REGIONS).map(([key, r]) => (
                   <option key={key} value={key}>{r.label}</option>
                 ))}
               </select>
+              {regionAutoDetected && (
+                <p className="font-body mt-1 text-xs text-white/30">Auto-detected based on your location</p>
+              )}
             </div>
 
             {/* Contact */}

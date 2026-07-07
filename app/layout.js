@@ -2,6 +2,7 @@ import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
 import ChatWidgetGate from '@/components/ChatWidgetGate'
+import CookieConsent from '@/components/CookieConsent'
 
 export const metadata = {
   title: 'BLXCKSHARK — Opening Soon',
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
           <CartProvider>
             {children}
             <ChatWidgetGate />
+            <CookieConsent />
           </CartProvider>
         </AuthProvider>
       </body>

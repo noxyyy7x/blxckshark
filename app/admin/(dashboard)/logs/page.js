@@ -21,6 +21,8 @@ const ACTION_LABELS = {
   product_updated: 'Updated a product',
   product_deleted: 'Deleted a product',
   broadcast_sent: 'Sent a broadcast message',
+  review_approved: 'Approved a review',
+  review_rejected: 'Rejected a review',
 }
 
 export default function AdminLogsPage() {

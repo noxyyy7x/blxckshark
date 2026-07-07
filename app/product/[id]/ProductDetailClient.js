@@ -1,14 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import ProductCard from '@/components/ProductCard'
+import ProductReviews from '@/components/ProductReviews'
 import SizeGuideModal from '@/components/SizeGuideModal'
 import Accordion from '@/components/Accordion'
 import { HeartIconOutline } from '@/components/Icons'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
 import { getUniqueSizes, getUniqueColors, isInStock } from '@/lib/products'
 import { getColorSwatch } from '@/lib/colorSwatches'
 
@@ -27,6 +30,18 @@ export default function ProductDetailClient({ product, related }) {
   const [addedMessage, setAddedMessage] = useState(false)
 
   const { addItem } = useCart()
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('wishlist_items')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('product_id', product.id)
+      .maybeSingle()
+      .then(({ data }) => setWishlisted(!!data))
+  }, [user, product.id])
 
   const selectedVariant = product.variants?.find(
     (v) => (sizes.length === 0 || v.size === selectedSize) && v.color === selectedColor
@@ -53,6 +68,20 @@ export default function ProductDetailClient({ product, related }) {
     })
     setAddedMessage(true)
     setTimeout(() => setAddedMessage(false), 2000)
+  }
+
+  async function handleToggleWishlist() {
+    if (!user) {
+      window.location.href = '/login'
+      return
+    }
+    if (wishlisted) {
+      await supabase.from('wishlist_items').delete().eq('user_id', user.id).eq('product_id', product.id)
+      setWishlisted(false)
+    } else {
+      await supabase.from('wishlist_items').insert({ user_id: user.id, product_id: product.id })
+      setWishlisted(true)
+    }
   }
 
   const accordionItems = [
@@ -192,7 +221,7 @@ export default function ProductDetailClient({ product, related }) {
               </button>
 
               <button
-                onClick={() => setWishlisted((w) => !w)}
+                onClick={handleToggleWishlist}
                 aria-label="Add to wishlist"
                 className="rounded-md border border-white/20 p-3 transition-colors hover:border-white/50"
               >
@@ -208,11 +237,8 @@ export default function ProductDetailClient({ product, related }) {
           </div>
         </div>
 
-        <section className="mx-auto max-w-7xl px-6 py-14">
-          <h2 className="font-display mb-4 text-xl font-bold uppercase tracking-tight">Reviews</h2>
-          <p className="font-body text-sm text-white/40">
-            No reviews yet — be the first to review this product once it&apos;s live.
-          </p>
+        <section className="mx-auto max-w-3xl px-6 py-14">
+          <ProductReviews productId={product.id} />
         </section>
 
         {related.length > 0 && (

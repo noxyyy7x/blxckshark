@@ -18,6 +18,19 @@ export default function Header() {
   const { itemCount } = useCart()
   const { user } = useAuth()
   const [hasUnread, setHasUnread] = useState(false)
+  const [wishlistCount, setWishlistCount] = useState(0)
+
+  useEffect(() => {
+    if (!user) {
+      setWishlistCount(0)
+      return
+    }
+    supabase
+      .from('wishlist_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .then(({ count }) => setWishlistCount(count || 0))
+  }, [user])
 
   useEffect(() => {
     if (!user) {
@@ -91,8 +104,9 @@ export default function Header() {
           <button onClick={() => setSearchOpen((v) => !v)} aria-label="Search">
             <SearchIcon />
           </button>
-          <a href="/wishlist" aria-label="Wishlist">
+          <a href="/wishlist" aria-label="Wishlist" className="relative">
             <HeartIcon />
+            {wishlistCount > 0 && <CartBadge count={wishlistCount} />}
           </a>
           <a href="/messages" aria-label="Messages" className="relative">
             <MessageIcon />
