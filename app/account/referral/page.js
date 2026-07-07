@@ -123,7 +123,7 @@ export default function ReferralPage() {
                 <p className="font-display text-2xl font-bold">£{balance.toFixed(2)}</p>
               </div>
               <p className="font-body text-xs text-white/40">
-                Cashout unlocks at £{threshold}
+                Redeem as discount code at £{threshold}
               </p>
             </div>
 
@@ -140,12 +140,12 @@ export default function ReferralPage() {
               className="font-body mt-5 w-full rounded-md bg-white py-3 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-30"
             >
               {hasPendingCashout
-                ? 'Cashout Requested — Pending'
+                ? 'Redemption Requested — Pending'
                 : requesting
                 ? 'Requesting...'
                 : canCashout
-                ? 'Request Cashout'
-                : `Reach £${threshold} to cash out`}
+                ? 'Redeem Balance as Discount Code'
+                : `Reach £${threshold} to redeem`}
             </button>
           </div>
 
