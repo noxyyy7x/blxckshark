@@ -39,6 +39,28 @@ export default function AdminOrdersPage() {
     setTracking(active?.tracking_number || '')
   }, [activeId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [retrying, setRetrying] = useState(false)
+
+  async function retryFulfillment(orderRef) {
+    setRetrying(true)
+    const { data: { session } } = await supabase.auth.getSession()
+
+    const res = await fetch('/api/admin/retry-fulfillment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderRef, accessToken: session.access_token }),
+    })
+    const data = await res.json()
+
+    setRetrying(false)
+    if (!res.ok) {
+      alert(data.error || 'Retry failed')
+      return
+    }
+    alert('Fulfillment retried successfully — XP/rewards awarded, order marked processing.')
+    loadOrders()
+  }
+
   async function updateStatus(orderId, status, trackingNumber) {
     const updates = { status }
     if (trackingNumber !== undefined) updates.tracking_number = trackingNumber
@@ -171,6 +193,23 @@ export default function AdminOrdersPage() {
                 Discount used: <span className="text-white">{active.discount_code}</span>
                 {' '}(−£{Number(active.discount_amount).toFixed(2)})
               </p>
+            )}
+
+            {active.status === 'pending_payment' && (
+              <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+                <p className="font-body mb-2 text-sm text-yellow-200">
+                  This order is stuck on Pending — payment may have succeeded but the webhook
+                  confirmation didn&apos;t arrive or process. Only use Retry if you&apos;ve confirmed
+                  the payment actually went through in your Revolut dashboard.
+                </p>
+                <button
+                  onClick={() => retryFulfillment(active.order_ref)}
+                  disabled={retrying}
+                  className="font-body rounded-md bg-yellow-400 px-4 py-2 text-xs font-semibold text-black disabled:opacity-60"
+                >
+                  {retrying ? 'Retrying...' : 'Retry Fulfillment'}
+                </button>
+              </div>
             )}
 
             {/* Dispatch controls */}

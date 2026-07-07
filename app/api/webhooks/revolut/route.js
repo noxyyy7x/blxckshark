@@ -34,6 +34,7 @@ export async function POST(request) {
   }
 
   const event = JSON.parse(rawBody)
+  console.log('Revolut webhook received:', event.event, event.merchant_order_ext_ref)
 
   if (event.event === 'ORDER_COMPLETED') {
     const supabase = getSupabaseAdmin()
@@ -45,10 +46,13 @@ export async function POST(request) {
       .eq('order_ref', orderRef)
       .maybeSingle()
 
+    console.log('Order lookup result:', order ? `found, status=${order.status}` : 'NOT FOUND')
+
     // Idempotency: only fulfill once, even if Revolut sends this event twice
     if (order && order.status === 'pending_payment') {
       await supabase.from('orders').update({ status: 'processing' }).eq('id', order.id)
       await fulfillOrder(supabase, order)
+      console.log('Order fulfilled successfully:', orderRef)
     }
   }
 
