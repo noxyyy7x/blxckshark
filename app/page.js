@@ -28,6 +28,11 @@ export default function ComingSoonPage() {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
+      {/* Everything below sits in an explicit stacking layer above the
+          background image — this guarantees correct layering regardless
+          of individual elements' own position/z-index quirks. */}
+      <div className="relative z-10 flex flex-col items-center">
+
       {/* Base grid texture */}
       <div className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(circle_at_center,black,transparent_75%)]" />
 
@@ -63,8 +68,8 @@ export default function ComingSoonPage() {
             />
           </defs>
           <text fontSize="7.2" fill="rgba(255,255,255,0.5)" letterSpacing="3">
-            <textPath href="#circlePath" startOffset="0%">
-              &#8226; LAUNCHING SOON &#8226; BUILT FOR MORE &#8226; LAUNCHING SOON &#8226; BUILT FOR MORE
+            <textPath href="#circlePath" startOffset="0%" textLength="263.9" lengthAdjust="spacing">
+              LAUNCHING SOON &#8226; BUILT FOR MORE &#8226; 
             </textPath>
           </text>
         </motion.svg>
@@ -157,6 +162,8 @@ export default function ComingSoonPage() {
           </a>
         ))}
       </motion.div>
+
+      </div>
     </main>
   )
 }
