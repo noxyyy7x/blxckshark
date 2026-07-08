@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 // so this can be updated without a code change. Placeholder data for now —
 // swap `image` for real product photography once available.
 const slides = [
-  { id: 1, image: null, label: 'Slide 1 — add product photo' },
-  { id: 2, image: null, label: 'Slide 2 — add product photo' },
-  { id: 3, image: null, label: 'Slide 3 — add product photo' },
+  { id: 1, image: '/hero/slide-1.jpg', label: '' },
+  { id: 2, image: '/hero/slide-2.jpg', label: '' },
+  { id: 3, image: '/hero/slide-3.jpg', label: '' },
 ]
 
 export default function HeroSlideshow() {
