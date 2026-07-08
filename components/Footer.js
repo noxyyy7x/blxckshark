@@ -51,10 +51,10 @@ const columns = [
 ]
 
 const socials = [
-  { name: 'Instagram', href: 'https://instagram.com/blxckshark', Icon: InstagramIcon },
-  { name: 'X', href: 'https://x.com/blxckshark', Icon: XIcon },
-  { name: 'Threads', href: 'https://threads.net/@blxckshark', Icon: ThreadsIcon },
-  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark', Icon: TikTokIcon },
+  { name: 'Instagram', href: 'https://instagram.com/blxckshark.co', Icon: InstagramIcon },
+  { name: 'X', href: 'https://x.com/blxcksharkco', Icon: XIcon },
+  { name: 'Threads', href: 'https://threads.net/@blxckshark.co', Icon: ThreadsIcon },
+  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark.co', Icon: TikTokIcon },
 ]
 
 const paymentIcons = [VisaIcon, MastercardIcon, AmexIcon, ApplePayIcon, GooglePayIcon]
@@ -138,7 +138,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-14 flex flex-col gap-6 border-t border-white/10 pt-8">
-          <div className="flex gap-5">
+          <div className="flex gap-3">
             {socials.map((s) => (
               <a
                 key={s.name}
@@ -146,16 +146,18 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.name}
-                className="text-white/50 transition-colors hover:text-white"
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] text-white/60 transition-all hover:scale-110 hover:border-white/40 hover:bg-white hover:text-black"
               >
-                <s.Icon className="h-5 w-5" />
+                <s.Icon className="h-4 w-4" />
               </a>
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-2 opacity-70">
+          <div className="flex flex-wrap gap-2">
             {paymentIcons.map((Icon, i) => (
-              <Icon key={i} className="h-6 w-9 text-white/70" />
+              <div key={i} className="overflow-hidden rounded-md shadow-sm ring-1 ring-white/10">
+                <Icon className="h-6 w-9" />
+              </div>
             ))}
           </div>
 

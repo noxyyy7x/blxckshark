@@ -4,10 +4,10 @@ import { motion } from 'framer-motion'
 import NotifyForm from '@/components/NotifyForm'
 
 const socials = [
-  { name: 'Instagram', href: 'https://instagram.com/blxckshark' },
-  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark' },
-  { name: 'X', href: 'https://x.com/blxckshark' },
-  { name: 'Threads', href: 'https://threads.net/@blxckshark' },
+  { name: 'Instagram', href: 'https://instagram.com/blxckshark.co' },
+  { name: 'TikTok', href: 'https://tiktok.com/@blxckshark.co' },
+  { name: 'X', href: 'https://x.com/blxcksharkco' },
+  { name: 'Threads', href: 'https://threads.net/@blxckshark.co' },
 ]
 
 const headline = 'OPENING SOON'

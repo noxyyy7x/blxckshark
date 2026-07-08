@@ -12,7 +12,7 @@ const CRITERIA = [
   },
   {
     title: 'Content Creation',
-    desc: 'You regularly post training content tagging @blxckshark or using #blxckshark across Instagram, TikTok, or X.',
+    desc: 'You regularly post training content tagging @blxckshark.co (Instagram/TikTok/Threads) or @blxcksharkco (X), or using #blxckshark.',
   },
   {
     title: 'Community Impact',
@@ -156,18 +156,18 @@ export default function AthletesPage() {
             Show Us What You&apos;ve Got
           </motion.h2>
           <motion.p {...fadeUp} className="font-body mx-auto mb-8 max-w-md text-sm text-white/50">
-            Post your training. Tag <span className="text-white">@blxckshark</span> or use{' '}
+            Post your training. Tag <span className="text-white">@blxckshark.co</span> or use{' '}
             <span className="text-white">#blxckshark</span>. Stay consistent. We&apos;re always watching for
             the next athlete to join the movement.
           </motion.p>
           <motion.a
             {...fadeUp}
-            href="https://instagram.com/blxckshark"
+            href="https://instagram.com/blxckshark.co"
             target="_blank"
             rel="noopener noreferrer"
             className="font-body inline-block rounded-md bg-white px-8 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02]"
           >
-            Follow @blxckshark
+            Follow @blxckshark.co
           </motion.a>
         </section>
       </main>
