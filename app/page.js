@@ -15,6 +15,19 @@ const headline = 'OPENING SOON'
 export default function ComingSoonPage() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
+      {/* Background photo */}
+      <div className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/coming-soon-bg.jpg"
+          alt=""
+          className="h-full w-full object-cover"
+          style={{ objectPosition: '65% center' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/50" />
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+
       {/* Base grid texture */}
       <div className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(circle_at_center,black,transparent_75%)]" />
 
@@ -76,22 +89,29 @@ export default function ComingSoonPage() {
       </motion.p>
 
       {/* Letter-by-letter headline reveal */}
-      <h1 className="text-glow font-display flex flex-wrap items-center justify-center text-6xl font-bold uppercase tracking-tight text-white sm:text-8xl">
-        {headline.split('').map((char, i) => (
-          <motion.span
-            key={i}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.25 + i * 0.035,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="inline-block"
-          >
-            {char === ' ' ? '\u00A0' : char}
-          </motion.span>
-        ))}
+      <h1 className="text-glow font-display flex flex-wrap items-center justify-center gap-x-4 text-6xl font-bold uppercase tracking-tight text-white sm:text-8xl">
+        {headline.split(' ').map((word, wordIdx, words) => {
+          const precedingChars = words.slice(0, wordIdx).join('').length + wordIdx
+          return (
+            <span key={wordIdx} className="inline-flex">
+              {word.split('').map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.25 + (precedingChars + i) * 0.035,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="inline-block"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </span>
+          )
+        })}
       </h1>
 
       <motion.div
