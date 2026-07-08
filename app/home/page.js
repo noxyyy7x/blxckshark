@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import HeroSlideshow from '@/components/HeroSlideshow'
 import FeaturedSection from '@/components/FeaturedSection'
+import CategoryShowcase from '@/components/CategoryShowcase'
 import { QualityIcon, PerformanceIcon, ShieldIcon, GlobeIcon } from '@/components/Icons'
 
 const features = [
@@ -13,16 +14,6 @@ const features = [
   { title: 'Performance Driven', desc: 'Built to perform', Icon: PerformanceIcon },
   { title: 'Built Different', desc: 'Stand out. Be you.', Icon: ShieldIcon },
   { title: 'Worldwide Shipping', desc: 'Delivering worldwide', Icon: GlobeIcon },
-]
-
-// TODO: pull from admin panel (Supabase "collections" table) so these can be
-// added/reordered/renamed without a code change.
-const collection = [
-  { name: 'T-Shirts', tagline: 'Engineered for performance' },
-  { name: 'Hoodies', tagline: 'Comfort meets style' },
-  { name: 'Joggers', tagline: 'Move without limits' },
-  { name: 'Stringers', tagline: 'Built for the grind' },
-  { name: 'Shorts', tagline: 'Light. Comfortable. Durable.' },
 ]
 
 const fadeUp = {
@@ -98,38 +89,16 @@ export default function HomePage() {
         {/* Collection preview */}
         <section className="mx-auto max-w-7xl px-6 py-20 text-center">
           <motion.p {...fadeUp} className="font-body text-xs font-semibold tracking-[0.3em] text-white/40">
-            COMING SOON
+            SHOP BY CATEGORY
           </motion.p>
           <motion.h2 {...fadeUp} className="font-display mt-3 text-3xl font-bold uppercase tracking-tight sm:text-5xl">
-            The First Collection
+            Explore The Range
           </motion.h2>
           <motion.p {...fadeUp} className="font-body mx-auto mt-3 max-w-md text-sm text-white/50">
             Performance. Style. Purpose. Everything you need. Nothing you don&apos;t.
           </motion.p>
 
-          <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-            {collection.map((item, i) => (
-              <motion.a
-                key={item.name}
-                href={`/shop/${item.name.toLowerCase()}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.5, delay: i * 0.06 }}
-                className="group flex flex-col gap-3"
-              >
-                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent transition-transform group-hover:scale-[1.02]">
-                  <div className="flex h-full w-full items-center justify-center text-xs text-white/20">
-                    Image coming soon
-                  </div>
-                </div>
-                <div className="text-left">
-                  <p className="font-body text-sm font-semibold">{item.name}</p>
-                  <p className="font-body text-xs text-white/50">{item.tagline}</p>
-                </div>
-              </motion.a>
-            ))}
-          </div>
+          <CategoryShowcase />
         </section>
 
         <FeaturedSection />
