@@ -1,13 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '@/lib/supabaseClient'
 
-// Message will eventually come from the admin panel "Site Settings" — hardcoded for now
-const MESSAGE = 'FREE SHIPPING ON UK ORDERS OVER £50 · OPENING SOON'
+const DEFAULT_MESSAGE = 'FREE SHIPPING ON UK ORDERS OVER £50'
 
 export default function NotificationBar() {
   const [visible, setVisible] = useState(true)
+  const [message, setMessage] = useState(DEFAULT_MESSAGE)
+
+  useEffect(() => {
+    supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'notification_bar')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setMessage(data.value)
+      })
+  }, [])
 
   return (
     <AnimatePresence>
@@ -21,7 +33,7 @@ export default function NotificationBar() {
         >
           <div className="flex items-center justify-center px-8 py-2 text-center">
             <p className="font-body text-[11px] font-semibold tracking-wider sm:text-xs">
-              {MESSAGE}
+              {message}
             </p>
             <button
               onClick={() => setVisible(false)}

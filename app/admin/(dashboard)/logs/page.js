@@ -23,6 +23,7 @@ const ACTION_LABELS = {
   broadcast_sent: 'Sent a broadcast message',
   review_approved: 'Approved a review',
   review_rejected: 'Rejected a review',
+  notification_bar_updated: 'Updated the site notification bar',
 }
 
 export default function AdminLogsPage() {
