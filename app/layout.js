@@ -3,6 +3,7 @@ import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
 import ChatWidgetGate from '@/components/ChatWidgetGate'
 import CookieConsent from '@/components/CookieConsent'
+import AnalyticsGate from '@/components/AnalyticsGate'
 
 export const metadata = {
   title: 'BLXCKSHARK — Opening Soon',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
             {children}
             <ChatWidgetGate />
             <CookieConsent />
+            <AnalyticsGate />
           </CartProvider>
         </AuthProvider>
       </body>

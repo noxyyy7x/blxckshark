@@ -20,6 +20,7 @@ export default function CookieConsent() {
 
   function handleChoice(choice) {
     localStorage.setItem(STORAGE_KEY, choice)
+    window.dispatchEvent(new Event('cookieConsentChanged'))
     setVisible(false)
   }
 
