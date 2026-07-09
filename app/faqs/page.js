@@ -3,6 +3,11 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import Accordion from '@/components/Accordion'
 
+export const metadata = {
+  title: 'FAQs',
+  description: 'Answers to common questions about BLXCKSHARK — loyalty rewards, orders, sizing, returns, and more.',
+}
+
 const FAQS = [
   { title: 'How does the tier/XP loyalty system work?', content: 'You earn XP on every purchase, plus for email signup, following us on social media, and referring friends. As your XP grows you climb through 5 tiers, each unlocking bigger rewards, early access to drops, and weekend XP boosts.' },
   { title: 'Where is my order?', content: 'Once your order ships, UK orders get a tracking number via Evri that you can view in your account under Orders. International orders currently ship untracked.' },

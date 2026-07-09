@@ -2,6 +2,11 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 
+export const metadata = {
+  title: 'Support',
+  description: 'Get in touch with the BLXCKSHARK team — live chat, email support, shipping info, and returns.',
+}
+
 export default function ContactPage() {
   return (
     <>

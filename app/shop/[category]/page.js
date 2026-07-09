@@ -8,6 +8,17 @@ import { GENDERS } from '@/lib/categories'
 
 export const dynamic = 'force-dynamic'
 
+export async function generateMetadata({ params }) {
+  const categoryParam = params?.category
+  const matchedCategory = GENDERS.find((c) => c.toLowerCase() === categoryParam?.toLowerCase())
+  if (!matchedCategory) return {}
+
+  return {
+    title: matchedCategory,
+    description: `Shop ${matchedCategory}'s performance apparel at BLXCKSHARK — engineered for those who push limits.`,
+  }
+}
+
 export default async function CategoryPage({ params }) {
   const categoryParam = params?.category
   if (!categoryParam) notFound()

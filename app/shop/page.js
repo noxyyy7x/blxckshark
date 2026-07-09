@@ -4,6 +4,11 @@ import NotificationBar from '@/components/NotificationBar'
 import ShopGrid from '@/components/ShopGrid'
 import { getAllProducts } from '@/lib/products'
 
+export const metadata = {
+  title: 'Shop All',
+  description: 'Browse the full BLXCKSHARK collection — premium performance apparel for men, women, and accessories.',
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function ShopPage() {

@@ -2,6 +2,11 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 
+export const metadata = {
+  title: 'Returns & Exchanges',
+  description: 'Our returns and exchanges policy for BLXCKSHARK orders — UK and international.',
+}
+
 export default function ReturnsPage() {
   return (
     <>

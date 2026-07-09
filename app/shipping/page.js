@@ -2,6 +2,11 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 
+export const metadata = {
+  title: 'Shipping Info',
+  description: 'UK, US, and EU shipping rates and delivery times for BLXCKSHARK orders.',
+}
+
 export default function ShippingPage() {
   return (
     <>

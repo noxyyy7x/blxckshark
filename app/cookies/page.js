@@ -2,6 +2,10 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 
+export const metadata = {
+  title: 'Cookie Policy',
+}
+
 export default function CookiesPage() {
   return (
     <>
