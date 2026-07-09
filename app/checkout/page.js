@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
 import { REGIONS } from '@/lib/shipping'
 import { validateDiscountCode } from '@/lib/discountCodes'
+import { supabase } from '@/lib/supabaseClient'
 
 const REVOLUT_MODE = process.env.NEXT_PUBLIC_REVOLUT_MODE || 'prod'
 
@@ -38,6 +39,8 @@ export default function CheckoutPage() {
   const [appliedDiscount, setAppliedDiscount] = useState(null)
   const [discountError, setDiscountError] = useState('')
   const [wantsAccount, setWantsAccount] = useState(true)
+  const [guestPassword, setGuestPassword] = useState('')
+  const [guestSignupError, setGuestSignupError] = useState('')
   const [paymentStarted, setPaymentStarted] = useState(false)
   const [paymentError, setPaymentError] = useState('')
   const [widgetLoading, setWidgetLoading] = useState(false)
@@ -82,6 +85,33 @@ export default function CheckoutPage() {
       alert('Please fill in all contact and shipping fields.')
       return
     }
+
+    setGuestSignupError('')
+    let effectiveBuyerId = user?.id || null
+    let isGuestSignupBonus = false
+
+    // If a guest wants an account, create it now — before payment — so the
+    // order is directly linked to a real account from the start.
+    if (!user && wantsAccount) {
+      if (guestPassword.length < 6) {
+        setGuestSignupError('Please choose a password (at least 6 characters) to create your account.')
+        return
+      }
+
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: guestPassword,
+      })
+
+      if (signUpError) {
+        setGuestSignupError(signUpError.message)
+        return
+      }
+
+      effectiveBuyerId = signUpData.user?.id || null
+      isGuestSignupBonus = true
+    }
+
     setPaymentStarted(true)
     setPaymentError('')
     setWidgetLoading(true)
@@ -110,7 +140,8 @@ export default function CheckoutPage() {
               referrerId: appliedDiscount?.referrerId || null,
               region,
               shippingAddress: address,
-              buyerId: user?.id || null,
+              buyerId: effectiveBuyerId,
+              guestSignupBonus: isGuestSignupBonus,
             }),
           })
           const data = await res.json()
@@ -298,17 +329,35 @@ export default function CheckoutPage() {
             </div>
 
             {!user && (
-              <label className="flex items-start gap-3 rounded-md border border-white/15 bg-white/5 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={wantsAccount}
-                  onChange={(e) => setWantsAccount(e.target.checked)}
-                  className="mt-1"
-                />
-                <span className="font-body text-sm text-white/70">
-                  Create an account to earn <strong className="text-white">150 XP</strong> and track this order.
-                </span>
-              </label>
+              <div>
+                <label className="flex items-start gap-3 rounded-md border border-white/15 bg-white/5 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={wantsAccount}
+                    onChange={(e) => setWantsAccount(e.target.checked)}
+                    disabled={paymentStarted}
+                    className="mt-1"
+                  />
+                  <span className="font-body text-sm text-white/70">
+                    Create an account to earn <strong className="text-white">150 XP</strong> and track this order.
+                  </span>
+                </label>
+                {wantsAccount && (
+                  <div className="mt-3">
+                    <input
+                      type="password"
+                      placeholder="Choose a password"
+                      value={guestPassword}
+                      onChange={(e) => setGuestPassword(e.target.value)}
+                      disabled={paymentStarted}
+                      className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                    />
+                    {guestSignupError && (
+                      <p className="font-body mt-2 text-xs text-red-400">{guestSignupError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
 
             {!paymentStarted ? (

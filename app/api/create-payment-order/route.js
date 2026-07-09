@@ -8,7 +8,7 @@ export async function POST(request) {
   try {
     const {
       email, items, subtotal, discountAmount, shippingCost, total,
-      discountCode, referrerId, region, shippingAddress, buyerId,
+      discountCode, referrerId, region, shippingAddress, buyerId, guestSignupBonus,
     } = await request.json()
 
     if (!email || !items || items.length === 0 || !shippingAddress || !total) {
@@ -34,6 +34,7 @@ export async function POST(request) {
       region,
       shipping_address: shippingAddress,
       status: 'pending_payment',
+      guest_signup_bonus: guestSignupBonus || false,
     })
 
     if (orderError) {
