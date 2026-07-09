@@ -67,9 +67,14 @@ export default function ComingSoonPage() {
               fill="none"
             />
           </defs>
-          <text fontSize="7.2" fill="rgba(255,255,255,0.5)" letterSpacing="3">
-            <textPath href="#circlePath" startOffset="0%" textLength="263.9" lengthAdjust="spacing">
-              LAUNCHING SOON &#8226; BUILT FOR MORE &#8226; 
+          <text fontSize="7.2" fill="rgba(255,255,255,0.5)" letterSpacing="2">
+            <textPath href="#circlePath" startOffset="0%">
+              LAUNCHING SOON
+            </textPath>
+          </text>
+          <text fontSize="7.2" fill="rgba(255,255,255,0.5)" letterSpacing="2">
+            <textPath href="#circlePath" startOffset="50%">
+              BUILT FOR MORE
             </textPath>
           </text>
         </motion.svg>
