@@ -36,8 +36,7 @@ export default function SocialRewardsPage() {
       })
   }, [user])
 
-  function handleFollowClick(platform) {
-    window.open(platform.href, '_blank', 'noopener,noreferrer')
+  function startClaimTimer(platform) {
     // Small delay before the claim button activates — encourages actually
     // following rather than instantly claiming without visiting.
     setTimeout(() => {
@@ -119,12 +118,15 @@ export default function SocialRewardsPage() {
                         {claiming === platform.key ? 'Claiming...' : `Claim ${XP_PER_FOLLOW} XP`}
                       </button>
                     ) : (
-                      <button
-                        onClick={() => handleFollowClick(platform)}
+                      <a
+                        href={platform.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => startClaimTimer(platform)}
                         className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold"
                       >
                         Follow
-                      </button>
+                      </a>
                     )}
                   </div>
                 )
