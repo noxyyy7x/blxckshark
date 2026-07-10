@@ -107,6 +107,7 @@ export default function AccountPage() {
               { label: 'Points History', href: '/account/points' },
               { label: 'Refer a Friend', href: '/account/referral' },
               { label: 'Social Rewards', href: '/account/social' },
+              ...(isAthlete ? [{ label: 'Payout Details', href: '/account/payout-details' }] : []),
               { label: 'Settings', href: '/account/settings' },
               { label: 'Support', href: '/contact' },
             ].map((item) => (

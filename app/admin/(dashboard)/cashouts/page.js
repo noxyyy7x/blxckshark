@@ -14,6 +14,26 @@ export default function AdminCashoutsPage() {
   const [processingId, setProcessingId] = useState(null)
   const [generatedCode, setGeneratedCode] = useState(null)
   const [cashConfirm, setCashConfirm] = useState(null)
+  const [payoutDetails, setPayoutDetails] = useState(null)
+  const [revealDetails, setRevealDetails] = useState(false)
+
+  async function openCashConfirm(request) {
+    setCashConfirm(request)
+    setRevealDetails(false)
+    setPayoutDetails(null)
+    const { data } = await supabase
+      .from('athlete_payout_details')
+      .select('*')
+      .eq('user_id', request.user_id)
+      .maybeSingle()
+    setPayoutDetails(data)
+  }
+
+  function maskMiddle(value, visibleStart = 2, visibleEnd = 4) {
+    if (!value) return ''
+    if (value.length <= visibleStart + visibleEnd) return value
+    return value.slice(0, visibleStart) + '••••' + value.slice(-visibleEnd)
+  }
 
   useEffect(() => {
     if (user) getStaffProfile(user.id).then((s) => setStaffId(s?.id))
@@ -148,6 +168,40 @@ export default function AdminCashoutsPage() {
             {cashConfirm.profiles?.display_name || cashConfirm.profiles?.email} via bank transfer.
             This only updates records — it does not send money.
           </p>
+
+          <div className="mb-4 rounded-md border border-white/10 bg-black/20 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-body text-xs font-semibold text-white/60">PAYOUT DETAILS</p>
+              {payoutDetails && (
+                <button
+                  onClick={() => setRevealDetails((v) => !v)}
+                  className="font-body text-xs text-white/50 underline hover:text-white"
+                >
+                  {revealDetails ? 'Hide' : 'Reveal Full Details'}
+                </button>
+              )}
+            </div>
+
+            {!payoutDetails ? (
+              <p className="font-body text-xs text-red-400">
+                No payout details on file — contact the athlete before sending payment.
+              </p>
+            ) : payoutDetails.payout_type === 'uk_bank' ? (
+              <div className="font-body text-xs text-white/80">
+                <p>{payoutDetails.account_name}</p>
+                <p>Sort code: {revealDetails ? payoutDetails.sort_code : maskMiddle(payoutDetails.sort_code, 2, 2)}</p>
+                <p>Account: {revealDetails ? payoutDetails.account_number : maskMiddle(payoutDetails.account_number, 0, 4)}</p>
+              </div>
+            ) : (
+              <div className="font-body text-xs text-white/80">
+                <p>{payoutDetails.account_name}</p>
+                <p>IBAN: {revealDetails ? payoutDetails.iban : maskMiddle(payoutDetails.iban, 2, 4)}</p>
+                <p>SWIFT/BIC: {revealDetails ? payoutDetails.swift_bic : maskMiddle(payoutDetails.swift_bic, 2, 2)}</p>
+                <p>Country: {payoutDetails.country}</p>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => setCashConfirm(null)}
@@ -219,7 +273,7 @@ export default function AdminCashoutsPage() {
                     </button>
                     {isAthlete ? (
                       <button
-                        onClick={() => setCashConfirm(r)}
+                        onClick={() => openCashConfirm(r)}
                         disabled={processingId === r.id}
                         className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
                       >
