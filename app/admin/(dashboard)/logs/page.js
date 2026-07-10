@@ -25,6 +25,8 @@ const ACTION_LABELS = {
   review_approved: 'Approved a review',
   review_rejected: 'Rejected a review',
   notification_bar_updated: 'Updated the site notification bar',
+  athlete_application_approved: 'Approved an athlete application',
+  athlete_application_rejected: 'Rejected an athlete application',
 }
 
 export default function AdminLogsPage() {
