@@ -23,7 +23,7 @@ const CRITERIA = [
 const PERKS = [
   { title: '20% Commission', desc: 'On every sale generated through your custom code — 10% above standard referral rate.' },
   { title: 'Custom Vanity Code', desc: 'Your own branded code (e.g. YOURNAME20) instead of a random referral code.' },
-  { title: 'Real Cash Payouts', desc: 'Cash out at £200 via direct bank transfer, with priority processing.' },
+  { title: 'Real Cash Payouts', desc: 'Cash out at £200 via direct bank transfer — just add your payout details once you\u2019re in.' },
   { title: 'Athlete Badge', desc: 'A distinct badge on your profile, visible across the BLXCKSHARK community.' },
 ]
 
