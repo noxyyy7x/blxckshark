@@ -9,6 +9,7 @@ export default function AdminAthleteApplicationsPage() {
   const { user } = useAuth()
   const [staffId, setStaffId] = useState(null)
   const [applications, setApplications] = useState([])
+  const [codeAvailability, setCodeAvailability] = useState({})
   const [filter, setFilter] = useState('pending')
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState(null)
@@ -26,6 +27,18 @@ export default function AdminAthleteApplicationsPage() {
       .order('created_at', { ascending: false })
     setApplications(data || [])
     setLoading(false)
+
+    // Check live availability for each pending code — time may have passed
+    // since they applied, and someone else could've taken it since.
+    const pending = (data || []).filter((a) => a.athlete_application_status === 'pending')
+    const results = await Promise.all(
+      pending.map(async (a) => {
+        const res = await fetch(`/api/athlete-application?code=${encodeURIComponent(a.pending_athlete_code)}`)
+        const json = await res.json()
+        return [a.id, json.available]
+      })
+    )
+    setCodeAvailability(Object.fromEntries(results))
   }
 
   async function handleApprove(application) {
@@ -123,8 +136,13 @@ export default function AdminAthleteApplicationsPage() {
               <div>
                 <p className="font-body text-sm font-semibold">{a.display_name || a.email}</p>
                 <p className="font-body text-xs text-white/40">
-                  {a.email} · Code: <span className="text-white/70">{a.pending_athlete_code}</span> ·{' '}
-                  Applied {new Date(a.created_at).toLocaleDateString('en-GB')}
+                  {a.email} · Code: <span className="text-white/70">{a.pending_athlete_code}</span>
+                  {a.athlete_application_status === 'pending' && codeAvailability[a.id] !== undefined && (
+                    <span className={codeAvailability[a.id] ? 'text-green-400' : 'text-red-400'}>
+                      {' '}· {codeAvailability[a.id] ? 'Available ✓' : 'Taken since applied ✕'}
+                    </span>
+                  )}
+                  {' '}· Applied {new Date(a.created_at).toLocaleDateString('en-GB')}
                 </p>
               </div>
 

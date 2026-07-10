@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -26,11 +26,27 @@ const fadeUp = {
 
 export default function AthleteSignupPage() {
   const [code, setCode] = useState('')
+  const [codeStatus, setCodeStatus] = useState(null) // null | 'checking' | 'available' | 'taken'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    const cleanCode = code.trim().toUpperCase().replace(/\s+/g, '')
+    if (cleanCode.length < 3) {
+      setCodeStatus(null)
+      return
+    }
+    setCodeStatus('checking')
+    const timeout = setTimeout(async () => {
+      const res = await fetch(`/api/athlete-application?code=${encodeURIComponent(cleanCode)}`)
+      const data = await res.json()
+      setCodeStatus(data.available ? 'available' : 'taken')
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [code])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -47,20 +63,12 @@ export default function AthleteSignupPage() {
       return
     }
 
-    setSubmitting(true)
-
-    // Check the chosen code isn't already taken as a referral code or an
-    // existing discount code, before creating the account.
-    const [{ data: existingProfile }, { data: existingDiscount }] = await Promise.all([
-      supabase.from('profiles').select('id').eq('referral_code', cleanCode).maybeSingle(),
-      supabase.from('discount_codes').select('id').eq('code', cleanCode).maybeSingle(),
-    ])
-
-    if (existingProfile || existingDiscount) {
+    if (codeStatus === 'taken') {
       setError('That code is already taken — please choose another.')
-      setSubmitting(false)
       return
     }
+
+    setSubmitting(true)
 
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -74,10 +82,17 @@ export default function AthleteSignupPage() {
     }
 
     if (signUpData.user) {
-      await supabase
-        .from('profiles')
-        .update({ pending_athlete_code: cleanCode, athlete_application_status: 'pending' })
-        .eq('id', signUpData.user.id)
+      const res = await fetch('/api/athlete-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: signUpData.user.id, code: cleanCode }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Something went wrong saving your application. Please contact support.')
+        setSubmitting(false)
+        return
+      }
     }
 
     setSubmitting(false)
@@ -144,13 +159,24 @@ export default function AthleteSignupPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Choose your custom code (e.g. YOURNAME20)"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm uppercase outline-none placeholder:text-white/40 placeholder:normal-case"
-              />
+              <div>
+                <input
+                  type="text"
+                  placeholder="Choose your custom code (e.g. YOURNAME20)"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm uppercase outline-none placeholder:text-white/40 placeholder:normal-case"
+                />
+                {codeStatus === 'checking' && (
+                  <p className="font-body mt-1.5 text-xs text-white/40">Checking availability...</p>
+                )}
+                {codeStatus === 'available' && (
+                  <p className="font-body mt-1.5 text-xs text-green-400">✓ Available</p>
+                )}
+                {codeStatus === 'taken' && (
+                  <p className="font-body mt-1.5 text-xs text-red-400">✕ Already taken — try another</p>
+                )}
+              </div>
               <input
                 type="email"
                 placeholder="Email address"
