@@ -137,7 +137,7 @@ export default function ChatWidget() {
           >
             <div className="border-b border-white/10 px-4 py-3">
               <p className="font-body text-sm font-semibold text-white">BLXCKSHARK Support</p>
-              <p className="font-body text-xs text-white/40">We typically reply within a few hours</p>
+              <p className="font-body text-xs text-white/40">Live chat with the BLXCKSHARK team</p>
             </div>
 
             {!user ? (
