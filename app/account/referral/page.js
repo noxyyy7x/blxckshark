@@ -8,8 +8,8 @@ import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 
-const CASHOUT_THRESHOLDS = { customer: 100, athlete: 200 }
-const COMMISSION_PERCENT = { customer: 15, athlete: 20 }
+const CASHOUT_THRESHOLDS = { customer: 50, athlete: 200 }
+const COMMISSION_PERCENT = { customer: 10, athlete: 20 }
 
 export default function ReferralPage() {
   const { user, loading } = useAuth()

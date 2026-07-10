@@ -13,6 +13,7 @@ const ACTION_LABELS = {
   discount_code_activated: 'Activated a discount code',
   discount_code_deactivated: 'Deactivated a discount code',
   cashout_approved: 'Approved a cashout (generated discount code)',
+  cashout_approved_cash: 'Approved a cashout (cash payout)',
   cashout_rejected: 'Rejected a cashout request',
   staff_created: 'Created a staff account',
   staff_permissions_updated: 'Updated staff permissions',

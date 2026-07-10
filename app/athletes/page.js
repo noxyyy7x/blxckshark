@@ -21,9 +21,9 @@ const CRITERIA = [
 ]
 
 const PERKS = [
-  { title: '20% Commission', desc: 'On every sale generated through your custom code — 5% above standard referral rate.' },
+  { title: '20% Commission', desc: 'On every sale generated through your custom code — 10% above standard referral rate.' },
   { title: 'Custom Vanity Code', desc: 'Your own branded code (e.g. YOURNAME20) instead of a random referral code.' },
-  { title: 'Lower Cashout Threshold Boost', desc: 'Cash out at £200 with priority processing.' },
+  { title: 'Real Cash Payouts', desc: 'Cash out at £200 via direct bank transfer, with priority processing.' },
   { title: 'Athlete Badge', desc: 'A distinct badge on your profile, visible across the BLXCKSHARK community.' },
 ]
 

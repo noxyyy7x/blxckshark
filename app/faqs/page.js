@@ -13,7 +13,7 @@ const FAQS = [
   { title: 'Where is my order?', content: 'Once your order ships, UK orders get a tracking number via Evri that you can view in your account under Orders. International orders currently ship untracked.' },
   { title: 'What sizing do you use?', content: 'Apparel sizing runs XXS to 3XL. Check our Size Guide for UK/EU/US conversions before ordering.' },
   { title: 'Can I return or exchange an item?', content: 'UK orders can be returned within 14 days. International orders are also accepted, with the customer covering return postage. Size exchanges are available.' },
-  { title: 'How do referral rewards work?', content: "Share your unique referral link — your friend gets 15% off (20% if you're an athlete), and you earn matching commission credited to your balance, redeemable as a discount code once you hit the threshold." },
+  { title: 'How do referral rewards work?', content: "Share your unique referral link — your friend gets 10% off (20% if you're an athlete), and you earn matching commission credited to your balance. Once you hit the threshold, customers can redeem their balance as a discount code, and athletes receive a real cash payout." },
   { title: 'How do I become a BLXCKSHARK Athlete?', content: "Our athlete program is invite-only. We look for people regularly training and creating content tagging @blxckshark.co or #blxckshark. Visit our Become an Athlete page for more." },
 ]
 
