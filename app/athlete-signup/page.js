@@ -12,6 +12,13 @@ const PERKS = [
   { title: 'Athlete Badge', desc: 'A distinct badge on your profile across the BLXCKSHARK community.' },
 ]
 
+const EXPECTATIONS = [
+  'Regular training content tagging @blxckshark.co or #blxckshark across your platforms',
+  'Honest, authentic feedback on the products you receive \u2014 no scripts, just your real experience',
+  'Representing the brand well \u2014 your activity reflects on BLXCKSHARK',
+  'Athlete status and perks are reviewed periodically based on activity and engagement',
+]
+
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
@@ -110,6 +117,19 @@ export default function AthleteSignupPage() {
               <p className="font-body mt-1 text-xs text-white/50">{perk.desc}</p>
             </div>
           ))}
+        </motion.div>
+
+        {/* Expectations */}
+        <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.35 }} className="mt-10 w-full rounded-xl border border-white/10 bg-white/[0.02] p-6 text-left">
+          <p className="font-body mb-4 text-xs font-semibold tracking-[0.25em] text-white/40">WHAT WE EXPECT</p>
+          <ul className="flex flex-col gap-3">
+            {EXPECTATIONS.map((item) => (
+              <li key={item} className="font-body flex items-start gap-3 text-sm text-white/70">
+                <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-white/40" />
+                {item}
+              </li>
+            ))}
+          </ul>
         </motion.div>
 
         {/* Signup form */}
