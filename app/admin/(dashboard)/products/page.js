@@ -7,6 +7,9 @@ import { getStaffProfile, logActivity } from '@/lib/staff'
 import { CATEGORIES, GENDERS, getTypesForGender, getSubcategoriesForType, FIT_TAGS } from '@/lib/categories'
 import { getSizesFor } from '@/lib/productSizes'
 import { getColorSwatch } from '@/lib/colorSwatches'
+import BrandLoader from '@/components/BrandLoader'
+import { TagIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const USD_MULTIPLIER = 1.25
 const EUR_MULTIPLIER = 1.15
@@ -205,14 +208,19 @@ export default function AdminProductsPage() {
   }
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
+
+  const totalStock = (product) => product.variants.reduce((sum, v) => sum + Number(v.stock || 0), 0)
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-6 text-2xl font-bold uppercase tracking-tight">
-        Products
-      </h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <TagIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Products
+        </h1>
+      </div>
 
       {/* Create/Edit form */}
       <form onSubmit={handleSave} className="mb-10 flex flex-col gap-5 rounded-lg border border-white/10 bg-white/[0.03] p-6">
@@ -476,32 +484,60 @@ export default function AdminProductsPage() {
       </form>
 
       {/* Product list */}
-      <div className="flex flex-col gap-3">
-        {products.map((p) => (
-          <div key={p.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4">
-            <div className="flex items-center gap-3">
-              {p.images?.[0] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.images[0]} alt="" className="h-12 w-12 rounded object-cover" />
-              )}
-              <div>
-                <p className="font-body text-sm font-semibold">{p.name}</p>
-                <p className="font-body text-xs text-white/40">
-                  {p.category_group} · {p.category_type} · {p.subcategory} · £{Number(p.price_gbp).toFixed(2)}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => startEdit(p)} className="font-body rounded-md border border-white/20 px-3 py-1.5 text-xs">
-                Edit
-              </button>
-              <button onClick={() => deleteProduct(p)} className="font-body rounded-md border border-red-400/30 px-3 py-1.5 text-xs text-red-400">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No products yet — add your first one above.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {products.map((p, i) => {
+            const stock = totalStock(p)
+            return (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.3) }}
+                className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]"
+              >
+                <div className="flex items-center gap-3">
+                  {p.images?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.images[0]} alt="" className="h-12 w-12 rounded object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded bg-white/5">
+                      <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-20" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-body flex items-center gap-2 text-sm font-semibold">
+                      {p.name}
+                      {p.is_featured && (
+                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-normal text-white/60">Featured</span>
+                      )}
+                    </p>
+                    <p className="font-body text-xs text-white/40">
+                      {p.category_group} · {p.category_type} · {p.subcategory} · £{Number(p.price_gbp).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`font-body text-xs ${stock === 0 ? 'text-red-400' : stock < 10 ? 'text-yellow-400' : 'text-white/40'}`}>
+                    {stock} in stock
+                  </span>
+                  <button onClick={() => startEdit(p)} className="font-body rounded-md border border-white/20 px-3 py-1.5 text-xs transition-colors hover:bg-white/10">
+                    Edit
+                  </button>
+                  <button onClick={() => deleteProduct(p)} className="font-body rounded-md border border-red-400/30 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-400/10">
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
