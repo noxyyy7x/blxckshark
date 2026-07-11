@@ -240,3 +240,61 @@ export function BadgeCheckIcon(props) {
     </svg>
   )
 }
+
+// --- Admin sidebar icons ---
+
+export function TagIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M20.5 12.8L12.7 20.6a2 2 0 01-2.8 0l-6.5-6.5a2 2 0 010-2.8L11.2 3.5a2 2 0 011.4-.6h6a2 2 0 012 2v6a2 2 0 01-.6 1.4z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="16" cy="8" r="1.4" />
+    </svg>
+  )
+}
+
+export function PercentIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M5 19L19 5" strokeLinecap="round" />
+      <circle cx="6.5" cy="6.5" r="2.5" />
+      <circle cx="17.5" cy="17.5" r="2.5" />
+    </svg>
+  )
+}
+
+export function SearchIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function TrophyIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M7 4h10v5a5 5 0 01-10 0V4z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 5H4a1 1 0 00-1 1v1a4 4 0 004 4M17 5h3a1 1 0 011 1v1a4 4 0 01-4 4" strokeLinecap="round" />
+      <path d="M12 14v3M9 21h6M9.5 17h5l.5 4H9l.5-4z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ClockIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ListIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M8 6h13M8 12h13M8 18h13" strokeLinecap="round" />
+      <path d="M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" strokeLinewidth="2.5" />
+    </svg>
+  )
+}
