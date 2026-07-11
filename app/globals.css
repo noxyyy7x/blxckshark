@@ -53,3 +53,10 @@ html {
   scrollbar-color: #2a2a2a #0a0a0a;
   scrollbar-width: thin;
 }
+
+/* Native cursor is hidden via a class added by CustomCursor.js itself,
+   only on customer-facing pages — admin and athlete-signup keep the
+   normal precise cursor for functional work */
+.custom-cursor-active {
+  cursor: none !important;
+}

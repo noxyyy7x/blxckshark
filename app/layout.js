@@ -5,6 +5,7 @@ import { ToastProvider } from '@/context/ToastContext'
 import ChatWidgetGate from '@/components/ChatWidgetGate'
 import CookieConsent from '@/components/CookieConsent'
 import AnalyticsGate from '@/components/AnalyticsGate'
+import CustomCursor from '@/components/CustomCursor'
 
 export const metadata = {
   title: {
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
               <ChatWidgetGate />
               <CookieConsent />
               <AnalyticsGate />
+              <CustomCursor />
             </ToastProvider>
           </CartProvider>
         </AuthProvider>
