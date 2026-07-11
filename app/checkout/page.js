@@ -11,6 +11,9 @@ import { REGIONS } from '@/lib/shipping'
 import { validateDiscountCode } from '@/lib/discountCodes'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/context/ToastContext'
+import EmptyState from '@/components/EmptyState'
+import { MailIcon, LockIcon, BoxIcon, PercentIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const REVOLUT_MODE = process.env.NEXT_PUBLIC_REVOLUT_MODE || 'prod'
 
@@ -175,11 +178,13 @@ export default function CheckoutPage() {
         <NotificationBar />
         <Header />
         <main className="min-h-screen bg-[#0a0a0a] text-white">
-          <div className="mx-auto max-w-xl px-6 py-24 text-center">
-            <p className="font-body mb-4 text-sm text-white/50">Your cart is empty.</p>
-            <a href="/shop" className="font-body inline-block rounded-md bg-white px-6 py-3 text-sm font-semibold text-black">
-              Continue Shopping
-            </a>
+          <div className="mx-auto max-w-xl px-6 py-16">
+            <EmptyState
+              title="Your cart is empty."
+              subtitle="Add something first to check out."
+              ctaLabel="Continue Shopping"
+              ctaHref="/shop"
+            />
           </div>
         </main>
         <Footer />
@@ -220,7 +225,10 @@ export default function CheckoutPage() {
 
             {/* Contact */}
             <div>
-              <h2 className="font-body mb-3 text-sm font-semibold">Contact</h2>
+              <h2 className="font-body mb-3 flex items-center gap-2 text-sm font-semibold">
+                <MailIcon className="h-4 w-4 text-white/40" />
+                Contact
+              </h2>
               <input
                 type="email"
                 required
@@ -228,7 +236,7 @@ export default function CheckoutPage() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
               />
             </div>
 
@@ -243,7 +251,7 @@ export default function CheckoutPage() {
                   placeholder="Full name"
                   value={address.name}
                   onChange={(e) => setAddress({ ...address, name: e.target.value })}
-                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
                 />
                 <input
                   type="text"
@@ -252,7 +260,7 @@ export default function CheckoutPage() {
                   placeholder="Address line 1"
                   value={address.line1}
                   onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                  className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <input
@@ -262,7 +270,7 @@ export default function CheckoutPage() {
                     placeholder="City"
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
                   />
                   <input
                     type="text"
@@ -271,7 +279,7 @@ export default function CheckoutPage() {
                     placeholder="Postcode"
                     value={address.postcode}
                     onChange={(e) => setAddress({ ...address, postcode: e.target.value })}
-                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                    className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -279,7 +287,10 @@ export default function CheckoutPage() {
 
             {/* Shipping method */}
             <div>
-              <h2 className="font-body mb-3 text-sm font-semibold">Shipping Method</h2>
+              <h2 className="font-body mb-3 flex items-center gap-2 text-sm font-semibold">
+                <BoxIcon className="h-4 w-4 text-white/40" />
+                Shipping Method
+              </h2>
               <div className="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-4 py-3">
                 <span className="font-body text-sm">
                   {region === 'UK' ? 'Evri Tracked' : 'International Standard'}
@@ -292,7 +303,10 @@ export default function CheckoutPage() {
 
             {/* Discount code */}
             <div>
-              <h2 className="font-body mb-3 text-sm font-semibold">Discount Code</h2>
+              <h2 className="font-body mb-3 flex items-center gap-2 text-sm font-semibold">
+                <PercentIcon className="h-4 w-4 text-white/40" />
+                Discount Code
+              </h2>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -352,7 +366,7 @@ export default function CheckoutPage() {
                       value={guestPassword}
                       onChange={(e) => setGuestPassword(e.target.value)}
                       disabled={paymentStarted}
-                      className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40 disabled:opacity-50"
+                      className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40 disabled:opacity-50"
                     />
                     {guestSignupError && (
                       <p className="font-body mt-2 text-xs text-red-400">{guestSignupError}</p>
@@ -363,12 +377,18 @@ export default function CheckoutPage() {
             )}
 
             {!paymentStarted ? (
-              <button
-                type="submit"
-                className="font-body rounded-md bg-white py-4 text-sm font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.98]"
-              >
-                Continue to Payment
-              </button>
+              <div>
+                <button
+                  type="submit"
+                  className="font-body w-full rounded-md bg-white py-4 text-sm font-semibold text-black transition-transform hover:scale-[1.01] active:scale-[0.98]"
+                >
+                  Continue to Payment
+                </button>
+                <p className="font-body mt-3 flex items-center justify-center gap-1.5 text-xs text-white/30">
+                  <LockIcon className="h-3.5 w-3.5" />
+                  Secure checkout — your payment details never touch our servers
+                </p>
+              </div>
             ) : (
               <div>
                 <p className="font-body mb-3 text-sm font-semibold">
@@ -387,15 +407,30 @@ export default function CheckoutPage() {
           </form>
 
           {/* Right: order summary */}
-          <div className="h-fit rounded-lg border border-white/10 bg-white/[0.03] p-6">
+          <motion.div
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="h-fit rounded-lg border border-white/10 bg-white/[0.03] p-6"
+          >
             <h2 className="font-display mb-4 text-lg font-bold uppercase tracking-tight">Order Summary</h2>
             <div className="flex flex-col gap-3 border-b border-white/10 pb-4">
               {items.map((item) => (
-                <div key={`${item.productId}-${item.size}-${item.color}`} className="flex justify-between text-sm">
-                  <span className="font-body text-white/70">
-                    {item.name} {item.size && `(${item.size})`} × {item.quantity}
-                  </span>
-                  <span className="font-body">£{(item.price * item.quantity).toFixed(2)}</span>
+                <div key={`${item.productId}-${item.size}-${item.color}`} className="flex items-center gap-3">
+                  {item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.image} alt="" className="h-12 w-12 flex-shrink-0 rounded-md object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md bg-white/5">
+                      <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-20" />
+                    </div>
+                  )}
+                  <div className="flex flex-1 items-center justify-between text-sm">
+                    <span className="font-body text-white/70">
+                      {item.name} {item.size && `(${item.size})`} × {item.quantity}
+                    </span>
+                    <span className="font-body">£{(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -423,7 +458,7 @@ export default function CheckoutPage() {
               <span className="font-body">Total</span>
               <span className="font-body">{regionConfig.symbol}{total.toFixed(2)}</span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
 
