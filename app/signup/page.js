@@ -36,7 +36,36 @@ export default function SignupPage() {
       <NotificationBar />
       <Header />
 
-      <main className="flex min-h-[80vh] items-center justify-center bg-[#0a0a0a] px-6 py-16 text-white">
+      <main className="flex min-h-[85vh] bg-[#0a0a0a] text-white">
+        {/* Branded left panel */}
+        <div className="relative hidden w-1/2 flex-col justify-center overflow-hidden bg-gradient-to-br from-neutral-800 via-neutral-900 to-black px-16 lg:flex">
+          <div className="absolute inset-0 bg-grid opacity-40" />
+          <div className="relative z-10">
+            <img src="/logo-icon.svg" alt="" className="mb-8 h-10 w-10 opacity-80" />
+            <h2 className="font-display mb-4 text-3xl font-bold uppercase leading-tight tracking-tight">
+              Join The Movement.
+            </h2>
+            <p className="font-body mb-8 max-w-sm text-sm text-white/50">
+              Create an account and start earning from your very first order.
+            </p>
+            <div className="flex flex-col gap-4">
+              {[
+                'Earn 10 XP for every £1 spent',
+                'Unlock tier rewards from day one',
+                'Get your own referral code instantly',
+                'Free to join, no strings attached',
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-white/40" />
+                  <p className="font-body text-sm text-white/60">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Form panel */}
+        <div className="flex w-full items-center justify-center px-6 py-16 lg:w-1/2">
         <div className="w-full max-w-sm">
           <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
             Join The Movement
@@ -60,7 +89,7 @@ export default function SignupPage() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40"
               />
               <input
                 type="password"
@@ -69,7 +98,7 @@ export default function SignupPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/40"
+                className="font-body w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/40 focus:border-white/40"
               />
               {error && <p className="font-body text-xs text-red-400">{error}</p>}
               <button
@@ -88,6 +117,7 @@ export default function SignupPage() {
               Log in
             </a>
           </p>
+        </div>
         </div>
       </main>
 
