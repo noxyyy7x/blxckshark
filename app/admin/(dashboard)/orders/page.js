@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/context/AuthContext'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import { useToast } from '@/context/ToastContext'
 
 const STATUS_OPTIONS = ['processing', 'dispatched', 'delivered']
 
 export default function AdminOrdersPage() {
+  const showToast = useToast()
   const { user } = useAuth()
   const [staffId, setStaffId] = useState(null)
   const [orders, setOrders] = useState([])
@@ -54,10 +56,10 @@ export default function AdminOrdersPage() {
 
     setRetrying(false)
     if (!res.ok) {
-      alert(data.error || 'Retry failed')
+      showToast(data.error || 'Retry failed', 'error')
       return
     }
-    alert('Fulfillment retried successfully — XP/rewards awarded, order marked processing.')
+    showToast('Fulfillment retried successfully — XP/rewards awarded, order marked processing.', 'success')
     loadOrders()
   }
 

@@ -7,6 +7,8 @@ import NotificationBar from '@/components/NotificationBar'
 import ProductCard from '@/components/ProductCard'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import BrandLoader from '@/components/BrandLoader'
+import EmptyState from '@/components/EmptyState'
 
 export default function WishlistPage() {
   const { user, loading } = useAuth()
@@ -46,14 +48,14 @@ export default function WishlistPage() {
               </a>
             </div>
           ) : pageLoading ? (
-            <p className="font-body text-sm text-white/40">Loading...</p>
+            <BrandLoader />
           ) : products.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="font-body mb-4 text-sm text-white/40">Nothing saved yet.</p>
-              <a href="/shop" className="font-body inline-block rounded-md bg-white px-6 py-3 text-sm font-semibold text-black">
-                Explore Products
-              </a>
-            </div>
+            <EmptyState
+              title="Nothing saved yet."
+              subtitle="Save pieces you're eyeing up — they'll be right here when you're ready."
+              ctaLabel="Explore Products"
+              ctaHref="/shop"
+            />
           ) : (
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
               {products.map((p, i) => (

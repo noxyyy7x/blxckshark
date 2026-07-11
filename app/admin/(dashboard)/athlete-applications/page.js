@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import { useToast } from '@/context/ToastContext'
 
 export default function AdminAthleteApplicationsPage() {
+  const showToast = useToast()
   const { user } = useAuth()
   const [staffId, setStaffId] = useState(null)
   const [applications, setApplications] = useState([])
@@ -54,7 +56,7 @@ export default function AdminAthleteApplicationsPage() {
       .maybeSingle()
 
     if (codeTaken) {
-      alert('That code has since been taken by another account. Reject and ask them to reapply with a different code.')
+      showToast('That code has since been taken by another account. Reject and ask them to reapply with a different code.', 'error')
       setProcessingId(null)
       return
     }

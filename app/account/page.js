@@ -8,6 +8,7 @@ import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getTierProgress } from '@/lib/tiers'
+import BrandLoader from '@/components/BrandLoader'
 
 export default function AccountPage() {
   const { user, loading, isEmailVerified, signOut } = useAuth()
@@ -40,7 +41,7 @@ export default function AccountPage() {
         <NotificationBar />
         <Header />
         <main className="flex min-h-[60vh] items-center justify-center bg-[#0a0a0a] text-white">
-          <p className="font-body text-sm text-white/40">Loading...</p>
+          <BrandLoader />
         </main>
         <Footer />
       </>

@@ -13,11 +13,13 @@ import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getUniqueSizes, getUniqueColors, isInStock } from '@/lib/products'
+import { useToast } from '@/context/ToastContext'
 import { getColorSwatch } from '@/lib/colorSwatches'
 
 const FREE_SHIPPING_THRESHOLD_GBP = 50
 
 export default function ProductDetailClient({ product, related }) {
+  const showToast = useToast()
   const sizes = getUniqueSizes(product)
   const colors = getUniqueColors(product)
   const productInStock = isInStock(product)
@@ -50,11 +52,11 @@ export default function ProductDetailClient({ product, related }) {
 
   function handleAddToCart() {
     if (sizes.length > 0 && !selectedSize) {
-      alert('Please select a size first.')
+      showToast('Please select a size first.', 'error')
       return
     }
     if (!selectedVariantInStock) {
-      alert('That size/color combination is out of stock.')
+      showToast('That size/color combination is out of stock.', 'error')
       return
     }
     addItem({
@@ -104,8 +106,9 @@ export default function ProductDetailClient({ product, related }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-white/20">
-                  Product image coming soon
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-b from-white/[0.03] to-transparent">
+                  <img src="/logo-icon.svg" alt="" className="h-14 w-14 opacity-10" />
+                  <span className="font-body text-xs text-white/20">Product image coming soon</span>
                 </div>
               )}
             </div>

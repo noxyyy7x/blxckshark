@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import EmptyState from '@/components/EmptyState'
 
 const STATUS_LABELS = {
   processing: 'Processing',
@@ -51,12 +52,12 @@ export default function OrdersPage() {
           </h1>
 
           {orders.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="font-body mb-4 text-sm text-white/40">No orders yet.</p>
-              <a href="/shop" className="font-body inline-block rounded-md bg-white px-6 py-3 text-sm font-semibold text-black">
-                Start Shopping
-              </a>
-            </div>
+            <EmptyState
+              title="No orders yet."
+              subtitle="When you place your first order, it'll show up right here."
+              ctaLabel="Start Shopping"
+              ctaHref="/shop"
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {orders.map((order) => (

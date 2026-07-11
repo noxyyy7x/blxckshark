@@ -7,6 +7,8 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import BrandLoader from '@/components/BrandLoader'
+import EmptyState from '@/components/EmptyState'
 
 export default function MessagesPage() {
   const { user, loading } = useAuth()
@@ -63,11 +65,12 @@ export default function MessagesPage() {
               </a>
             </div>
           ) : pageLoading ? (
-            <p className="font-body text-sm text-white/40">Loading...</p>
+            <BrandLoader />
           ) : messages.length === 0 ? (
-            <p className="font-body text-sm text-white/40">
-              No messages yet — updates, rewards, and offers will show up here.
-            </p>
+            <EmptyState
+              title="No messages yet."
+              subtitle="Updates, rewards, and offers will show up here."
+            />
           ) : (
             <div className="flex flex-col gap-3">
               {messages.map((m) => (

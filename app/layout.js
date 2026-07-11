@@ -1,6 +1,7 @@
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
+import { ToastProvider } from '@/context/ToastContext'
 import ChatWidgetGate from '@/components/ChatWidgetGate'
 import CookieConsent from '@/components/CookieConsent'
 import AnalyticsGate from '@/components/AnalyticsGate'
@@ -25,10 +26,12 @@ export default function RootLayout({ children }) {
       <body className="font-body bg-background text-white antialiased">
         <AuthProvider>
           <CartProvider>
-            {children}
-            <ChatWidgetGate />
-            <CookieConsent />
-            <AnalyticsGate />
+            <ToastProvider>
+              {children}
+              <ChatWidgetGate />
+              <CookieConsent />
+              <AnalyticsGate />
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>

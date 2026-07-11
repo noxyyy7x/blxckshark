@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import ProductCard from '@/components/ProductCard'
+import BrandLoader from '@/components/BrandLoader'
 import { searchProducts } from '@/lib/products'
 
 function SearchResults() {
@@ -52,7 +53,7 @@ export default function SearchPage() {
       <NotificationBar />
       <Header />
       <main className="min-h-screen bg-[#0a0a0a] text-white">
-        <Suspense fallback={<div className="px-6 py-12 text-sm text-white/40">Loading...</div>}>
+        <Suspense fallback={<BrandLoader />}>
           <SearchResults />
         </Suspense>
       </main>

@@ -6,6 +6,8 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import BrandLoader from '@/components/BrandLoader'
+import { useToast } from '@/context/ToastContext'
 
 const XP_PER_FOLLOW = 50
 
@@ -17,6 +19,7 @@ const PLATFORMS = [
 ]
 
 export default function SocialRewardsPage() {
+  const showToast = useToast()
   const { user, loading } = useAuth()
   const [profile, setProfile] = useState(null)
   const [pageLoading, setPageLoading] = useState(true)
@@ -64,7 +67,7 @@ export default function SocialRewardsPage() {
     if (res.ok) {
       setProfile((prev) => ({ ...prev, [platform.column]: true, xp: data.newXp }))
     } else {
-      alert(data.error || 'Something went wrong claiming that reward.')
+      showToast(data.error || 'Something went wrong claiming that reward.', 'error')
     }
     setClaiming(null)
   }
@@ -82,7 +85,7 @@ export default function SocialRewardsPage() {
           </p>
 
           {loading || pageLoading ? (
-            <p className="font-body text-sm text-white/40">Loading...</p>
+            <BrandLoader />
           ) : !user ? (
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6 text-center">
               <p className="font-body mb-4 text-sm text-white/60">Sign in to claim social rewards.</p>

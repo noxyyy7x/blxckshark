@@ -21,8 +21,9 @@ export default function ProductCard({ product, index = 0 }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt={product.name} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-white/20">
-            Image coming soon
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/[0.03] to-transparent">
+            <img src="/logo-icon.svg" alt="" className="h-8 w-8 opacity-10" />
+            <span className="font-body text-[10px] text-white/20">Image coming soon</span>
           </div>
         )}
         {!inStock && (

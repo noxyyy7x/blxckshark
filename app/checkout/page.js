@@ -10,10 +10,12 @@ import { useAuth } from '@/context/AuthContext'
 import { REGIONS } from '@/lib/shipping'
 import { validateDiscountCode } from '@/lib/discountCodes'
 import { supabase } from '@/lib/supabaseClient'
+import { useToast } from '@/context/ToastContext'
 
 const REVOLUT_MODE = process.env.NEXT_PUBLIC_REVOLUT_MODE || 'prod'
 
 export default function CheckoutPage() {
+  const showToast = useToast()
   const { items, subtotal, clearCart } = useCart()
   const { user } = useAuth()
   const router = useRouter()
@@ -82,7 +84,7 @@ export default function CheckoutPage() {
   async function handleContinueToPayment(e) {
     e.preventDefault()
     if (!validateFields()) {
-      alert('Please fill in all contact and shipping fields.')
+      showToast('Please fill in all contact and shipping fields.', 'error')
       return
     }
 

@@ -7,8 +7,10 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import { useToast } from '@/context/ToastContext'
 
 export default function SettingsPage() {
+  const showToast = useToast()
   const { user, loading } = useAuth()
   const router = useRouter()
   const fileInputRef = useRef(null)
@@ -74,7 +76,7 @@ export default function SettingsPage() {
       .upload(path, file, { upsert: true })
 
     if (uploadError) {
-      alert('Upload failed: ' + uploadError.message)
+      showToast('Upload failed: ' + uploadError.message, 'error')
       setUploading(false)
       return
     }

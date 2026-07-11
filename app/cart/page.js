@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useCart } from '@/context/CartContext'
+import EmptyState from '@/components/EmptyState'
 
 const FREE_SHIPPING_THRESHOLD_GBP = 50
 
@@ -24,12 +25,12 @@ export default function CartPage() {
           </h1>
 
           {items.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="font-body mb-4 text-sm text-white/50">Your cart is empty.</p>
-              <a href="/shop" className="font-body inline-block rounded-md bg-white px-6 py-3 text-sm font-semibold text-black">
-                Continue Shopping
-              </a>
-            </div>
+            <EmptyState
+              title="Your cart is empty."
+              subtitle="Built for more starts with something to build with."
+              ctaLabel="Continue Shopping"
+              ctaHref="/shop"
+            />
           ) : (
             <>
               {/* Free shipping progress */}
