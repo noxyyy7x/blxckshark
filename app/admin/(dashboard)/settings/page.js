@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { GearIcon } from '@/components/Icons'
 
 export default function AdminSettingsPage() {
   const { user } = useAuth()
@@ -45,17 +48,26 @@ export default function AdminSettingsPage() {
   }
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">Site Settings</h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <GearIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">Site Settings</h1>
+      </div>
       <p className="font-body mb-8 text-sm text-white/50">
         Changes here go live across the entire site immediately.
       </p>
 
-      <form onSubmit={handleSave} className="max-w-xl rounded-lg border border-white/10 bg-white/[0.03] p-6">
+      <motion.form
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        onSubmit={handleSave}
+        className="max-w-xl rounded-lg border border-white/10 bg-white/[0.03] p-6"
+      >
         <label className="font-body mb-2 block text-xs font-semibold tracking-wide text-white/50">
           NOTIFICATION BAR MESSAGE
         </label>
@@ -73,11 +85,11 @@ export default function AdminSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60"
+          className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform hover:scale-105 disabled:opacity-60"
         >
           {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Changes'}
         </button>
-      </form>
+      </motion.form>
     </div>
   )
 }

@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { ChatBubbleIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const DURATIONS = [
   { label: '24 hours', hours: 24 },
@@ -82,14 +85,17 @@ export default function AdminMessagesPage() {
   const now = Date.now()
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
-        Broadcast Messages
-      </h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <ChatBubbleIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Broadcast Messages
+        </h1>
+      </div>
       <p className="font-body mb-8 text-sm text-white/50">
         Sends to every customer's inbox — sale announcements, shop-wide codes, updates.
       </p>
@@ -133,7 +139,7 @@ export default function AdminMessagesPage() {
         <button
           type="submit"
           disabled={sending}
-          className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60"
+          className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform hover:scale-105 disabled:opacity-60"
         >
           {sending ? 'Sending...' : 'Send Broadcast'}
         </button>
@@ -144,23 +150,37 @@ export default function AdminMessagesPage() {
       </form>
 
       <h2 className="font-body mb-3 text-sm font-semibold text-white/70">Recent Broadcasts</h2>
-      <div className="flex flex-col gap-3">
-        {broadcasts.map((b) => {
-          const expired = b.expires_at && new Date(b.expires_at).getTime() < now
-          return (
-            <div key={b.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-1 flex items-center justify-between">
-                <p className="font-body text-sm font-semibold">{b.title}</p>
-                <span className={`font-body text-xs ${expired ? 'text-white/30' : 'text-green-400'}`}>
-                  {expired ? 'Expired' : b.expires_at ? `Active until ${new Date(b.expires_at).toLocaleString('en-GB')}` : 'No expiry'}
-                </span>
-              </div>
-              <p className="font-body text-xs text-white/50">{b.body}</p>
-              {b.code && <p className="font-body mt-1 text-xs text-white/70">Code: {b.code}</p>}
-            </div>
-          )
-        })}
-      </div>
+      {broadcasts.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No broadcasts sent yet.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {broadcasts.map((b, i) => {
+            const expired = b.expires_at && new Date(b.expires_at).getTime() < now
+            return (
+              <motion.div
+                key={b.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.3) }}
+                className="rounded-lg border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]"
+              >
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="font-body text-sm font-semibold">{b.title}</p>
+                  <span className={`font-body flex items-center gap-1.5 text-xs ${expired ? 'text-white/30' : 'text-green-400'}`}>
+                    {!expired && <span className="h-1.5 w-1.5 rounded-full bg-green-400" />}
+                    {expired ? 'Expired' : b.expires_at ? `Active until ${new Date(b.expires_at).toLocaleString('en-GB')}` : 'No expiry'}
+                  </span>
+                </div>
+                <p className="font-body text-xs text-white/50">{b.body}</p>
+                {b.code && <p className="font-body mt-1 text-xs text-white/70">Code: {b.code}</p>}
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

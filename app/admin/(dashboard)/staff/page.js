@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity, ADMIN_SECTIONS } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { UsersIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 // Every section a staff member could be granted, excluding Staff
 // Management itself (always owner-only, never assignable).
@@ -97,14 +100,17 @@ export default function AdminStaffPage() {
   }
 
   if (loading || !me) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
-        Staff Management
-      </h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <UsersIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Staff Management
+        </h1>
+      </div>
       <p className="font-body mb-8 text-sm text-white/50">
         Owner-only. Create staff accounts and control exactly what each person can access.
       </p>
@@ -154,7 +160,7 @@ export default function AdminStaffPage() {
         <button
           type="submit"
           disabled={creating}
-          className="font-body rounded-md bg-white px-5 py-2 text-sm font-semibold text-black disabled:opacity-60"
+          className="font-body rounded-md bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 disabled:opacity-60"
         >
           {creating ? 'Creating...' : 'Create Staff Account'}
         </button>
@@ -165,15 +171,25 @@ export default function AdminStaffPage() {
 
       {/* Staff list */}
       <div className="flex flex-col gap-4">
-        {staffList.map((s) => (
-          <div key={s.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
+        {staffList.map((s, i) => (
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
+            className="rounded-lg border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]"
+          >
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="font-body text-sm font-semibold">
-                  {s.name} {s.is_owner && <span className="ml-2 rounded bg-white/10 px-2 py-0.5 text-[10px]">OWNER</span>}
+                <p className="font-body flex items-center gap-2 text-sm font-semibold">
+                  {s.name} {s.is_owner && <span className="rounded bg-white/10 px-2 py-0.5 text-[10px]">OWNER</span>}
                 </p>
-                <p className="font-body text-xs text-white/40">
-                  {s.email} · {s.auth_id ? 'Active' : 'Pending sign-up'}
+                <p className="font-body flex items-center gap-1.5 text-xs text-white/40">
+                  {s.email} ·
+                  <span className={`flex items-center gap-1 ${s.auth_id ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${s.auth_id ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                    {s.auth_id ? 'Active' : 'Pending sign-up'}
+                  </span>
                 </p>
               </div>
               {!s.is_owner && (
@@ -192,10 +208,10 @@ export default function AdminStaffPage() {
                   <button
                     key={section.key}
                     onClick={() => updateStaffPermission(s, section.key, !s.permissions?.[section.key])}
-                    className={`font-body rounded-full border px-3 py-1.5 text-xs ${
+                    className={`font-body rounded-full border px-3 py-1.5 text-xs transition-colors ${
                       s.permissions?.[section.key]
                         ? 'border-white bg-white text-black'
-                        : 'border-white/20 text-white/50'
+                        : 'border-white/20 text-white/50 hover:border-white/40'
                     }`}
                   >
                     {section.label}
@@ -203,7 +219,7 @@ export default function AdminStaffPage() {
                 ))}
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import BrandLoader from '@/components/BrandLoader'
+import { ListIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const ACTION_LABELS = {
   promoted_athlete: 'Promoted to Athlete',
@@ -47,21 +50,33 @@ export default function AdminLogsPage() {
   }, [])
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-6 text-2xl font-bold uppercase tracking-tight">
-        Activity Logs
-      </h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <ListIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Activity Logs
+        </h1>
+      </div>
 
       {logs.length === 0 ? (
-        <p className="font-body text-sm text-white/40">No staff activity recorded yet.</p>
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No staff activity recorded yet.</p>
+        </div>
       ) : (
         <div className="divide-y divide-white/10 border-y border-white/10">
-          {logs.map((log) => (
-            <div key={log.id} className="flex items-center justify-between py-3">
+          {logs.map((log, i) => (
+            <motion.div
+              key={log.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.3) }}
+              className="flex items-center justify-between py-3 transition-colors hover:bg-white/[0.02]"
+            >
               <div>
                 <p className="font-body text-sm">
                   <span className="font-semibold">{log.staff_users?.name || 'Unknown'}</span>
@@ -77,7 +92,7 @@ export default function AdminLogsPage() {
               <p className="font-body text-xs text-white/40">
                 {new Date(log.created_at).toLocaleString('en-GB')}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

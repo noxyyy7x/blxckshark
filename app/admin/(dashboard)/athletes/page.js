@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { UsersIcon } from '@/components/Icons'
 
 export default function AdminAthletesPage() {
   const { user } = useAuth()
@@ -63,14 +66,17 @@ export default function AdminAthletesPage() {
   })
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-6 text-2xl font-bold uppercase tracking-tight">
-        Athletes Management
-      </h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <UsersIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Athletes Management
+        </h1>
+      </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <input
@@ -85,8 +91,8 @@ export default function AdminAthletesPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`font-body rounded-full px-3 py-1.5 text-xs capitalize ${
-                filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60'
+              className={`font-body rounded-full px-3 py-1.5 text-xs capitalize transition-colors ${
+                filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60 hover:bg-white/20'
               }`}
             >
               {f}
@@ -95,65 +101,78 @@ export default function AdminAthletesPage() {
         </div>
       </div>
 
-      <div className="divide-y divide-white/10 border-y border-white/10">
-        {filtered.map((profile) => (
-          <div key={profile.id} className="flex items-center justify-between py-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-body text-sm font-semibold">
-                  {profile.display_name || profile.email}
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No matching accounts.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-white/10 border-y border-white/10">
+          {filtered.map((profile, i) => (
+            <motion.div
+              key={profile.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25, delay: Math.min(i * 0.02, 0.3) }}
+              className="flex items-center justify-between py-4 transition-colors hover:bg-white/[0.02]"
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-body text-sm font-semibold">
+                    {profile.display_name || profile.email}
+                  </p>
+                  {profile.role === 'athlete' && (
+                    <span className="font-body rounded bg-white/10 px-2 py-0.5 text-[10px] font-semibold">
+                      🦈 ATHLETE
+                    </span>
+                  )}
+                </div>
+                <p className="font-body text-xs text-white/40">
+                  {profile.email} · {profile.xp} XP · Code: {profile.referral_code} · Balance: £{Number(profile.referral_balance).toFixed(2)}
                 </p>
-                {profile.role === 'athlete' && (
-                  <span className="font-body rounded bg-white/10 px-2 py-0.5 text-[10px] font-semibold">
-                    🦈 ATHLETE
-                  </span>
-                )}
               </div>
-              <p className="font-body text-xs text-white/40">
-                {profile.email} · {profile.xp} XP · Code: {profile.referral_code} · Balance: £{Number(profile.referral_balance).toFixed(2)}
-              </p>
-            </div>
 
-            {profile.role === 'athlete' ? (
-              <button
-                onClick={() => handleDemote(profile.id)}
-                className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold"
-              >
-                Remove Athlete
-              </button>
-            ) : promotingId === profile.id ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Custom code"
-                  value={customCode}
-                  onChange={(e) => setCustomCode(e.target.value)}
-                  className="font-body w-32 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-xs uppercase outline-none placeholder:normal-case"
-                />
+              {profile.role === 'athlete' ? (
                 <button
-                  onClick={() => handlePromote(profile.id)}
-                  className="font-body rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-black"
+                  onClick={() => handleDemote(profile.id)}
+                  className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold transition-colors hover:bg-red-400/10 hover:border-red-400/30 hover:text-red-300"
                 >
-                  Confirm
+                  Remove Athlete
                 </button>
+              ) : promotingId === profile.id ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Custom code"
+                    value={customCode}
+                    onChange={(e) => setCustomCode(e.target.value)}
+                    className="font-body w-32 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-xs uppercase outline-none placeholder:normal-case"
+                  />
+                  <button
+                    onClick={() => handlePromote(profile.id)}
+                    className="font-body rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-black transition-transform hover:scale-105"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => { setPromotingId(null); setCustomCode('') }}
+                    className="font-body text-xs text-white/40 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={() => { setPromotingId(null); setCustomCode('') }}
-                  className="font-body text-xs text-white/40"
+                  onClick={() => setPromotingId(profile.id)}
+                  className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black transition-transform hover:scale-105"
                 >
-                  Cancel
+                  Promote to Athlete
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setPromotingId(profile.id)}
-                className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black"
-              >
-                Promote to Athlete
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

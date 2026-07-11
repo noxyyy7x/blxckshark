@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabaseClient'
 import { getTierForXp } from '@/lib/tiers'
+import BrandLoader from '@/components/BrandLoader'
 
 const PODIUM_STYLES = {
   1: { height: 'h-64', accent: '#FFD700', label: '1ST', order: 'order-2' },
@@ -29,7 +30,7 @@ export default function AdminLeaderboardPage() {
   }, [])
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   const top3 = profiles.slice(0, 3)
@@ -104,7 +105,13 @@ export default function AdminLeaderboardPage() {
               const rank = i + 4
               const tier = getTierForXp(profile.xp)
               return (
-                <div key={profile.id} className="flex items-center gap-4 px-5 py-3">
+                <motion.div
+                  key={profile.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.5 + Math.min(i * 0.03, 0.4) }}
+                  className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-white/[0.03]"
+                >
                   <span className="font-display w-6 text-sm font-bold text-white/40">
                     {rank}
                   </span>
@@ -119,7 +126,7 @@ export default function AdminLeaderboardPage() {
                   <span className="font-display w-20 text-right text-sm font-bold text-white">
                     {profile.xp.toLocaleString()} XP
                   </span>
-                </div>
+                </motion.div>
               )
             })}
           </div>

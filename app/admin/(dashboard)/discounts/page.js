@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { PercentIcon } from '@/components/Icons'
 
 export default function AdminDiscountsPage() {
   const { user } = useAuth()
@@ -71,14 +74,17 @@ export default function AdminDiscountsPage() {
   }
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-6 text-2xl font-bold uppercase tracking-tight">
-        Discount Codes
-      </h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <PercentIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Discount Codes
+        </h1>
+      </div>
 
       {/* Create new code */}
       <form onSubmit={handleCreate} className="mb-8 flex flex-wrap items-end gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-5">
@@ -107,7 +113,7 @@ export default function AdminDiscountsPage() {
         <button
           type="submit"
           disabled={creating}
-          className="font-body rounded-md bg-white px-5 py-2 text-sm font-semibold text-black disabled:opacity-60"
+          className="font-body rounded-md bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 disabled:opacity-60"
         >
           {creating ? 'Creating...' : 'Create Code'}
         </button>
@@ -116,11 +122,20 @@ export default function AdminDiscountsPage() {
 
       {/* Codes list */}
       {codes.length === 0 ? (
-        <p className="font-body text-sm text-white/40">No discount codes created yet.</p>
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No discount codes created yet.</p>
+        </div>
       ) : (
         <div className="divide-y divide-white/10 border-y border-white/10">
-          {codes.map((c) => (
-            <div key={c.id} className="flex items-center justify-between py-3">
+          {codes.map((c, i) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.3) }}
+              className="flex items-center justify-between py-3 transition-colors hover:bg-white/[0.02]"
+            >
               <div>
                 <p className="font-body text-sm font-semibold">{c.code}</p>
                 <p className="font-body text-xs text-white/40">
@@ -129,13 +144,14 @@ export default function AdminDiscountsPage() {
               </div>
               <button
                 onClick={() => toggleActive(c)}
-                className={`font-body rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  c.active ? 'bg-white text-black' : 'border border-white/20 text-white/50'
+                className={`font-body flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  c.active ? 'bg-green-400/10 text-green-300' : 'border border-white/20 text-white/50 hover:bg-white/10'
                 }`}
               >
+                {c.active && <span className="h-1.5 w-1.5 rounded-full bg-green-400" />}
                 {c.active ? 'Active' : 'Inactive'}
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

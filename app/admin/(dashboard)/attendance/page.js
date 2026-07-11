@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { ClockIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 function formatDuration(ms) {
   const totalMinutes = Math.floor(ms / 60000)
@@ -78,17 +81,25 @@ export default function AttendancePage() {
   }
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-6 text-2xl font-bold uppercase tracking-tight">
-        Staff Attendance
-      </h1>
+      <div className="mb-6 flex items-center gap-2.5">
+        <ClockIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Staff Attendance
+        </h1>
+      </div>
 
       {/* Clock in/out for yourself */}
-      <div className="mb-8 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-8 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5"
+      >
         <div>
           <p className="font-body text-sm font-semibold">{myStaff?.name}</p>
           <p className="font-body text-xs text-white/40">
@@ -100,27 +111,33 @@ export default function AttendancePage() {
         {myActiveShift ? (
           <button
             onClick={handleClockOut}
-            className="font-body rounded-md border border-white/20 px-5 py-2.5 text-sm font-semibold"
+            className="font-body rounded-md border border-white/20 px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-white/10"
           >
             Clock Out
           </button>
         ) : (
           <button
             onClick={handleClockIn}
-            className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black"
+            className="font-body rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform hover:scale-105"
           >
             Clock In
           </button>
         )}
-      </div>
+      </motion.div>
 
       {/* Live team status */}
       <h2 className="font-body mb-3 text-sm font-semibold text-white/70">Team Status</h2>
       <div className="divide-y divide-white/10 border-y border-white/10">
-        {allStaff.map((s) => {
+        {allStaff.map((s, i) => {
           const shift = activeShifts.find((a) => a.staff_id === s.id)
           return (
-            <div key={s.id} className="flex items-center justify-between py-3">
+            <motion.div
+              key={s.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25, delay: Math.min(i * 0.04, 0.3) }}
+              className="flex items-center justify-between py-3 transition-colors hover:bg-white/[0.02]"
+            >
               <div className="flex items-center gap-2">
                 <span
                   className={`h-2 w-2 rounded-full ${shift ? 'bg-green-400' : 'bg-white/20'}`}
@@ -137,7 +154,7 @@ export default function AttendancePage() {
                   ? `Active — ${formatDuration(now - new Date(shift.clock_in).getTime())}`
                   : 'Off'}
               </span>
-            </div>
+            </motion.div>
           )
         })}
       </div>

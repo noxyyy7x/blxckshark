@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 export default function ChatWidget() {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
@@ -16,11 +20,14 @@ export default function ChatWidget() {
   const [loadingChat, setLoadingChat] = useState(false)
   const scrollRef = useRef(null)
 
-  // Find or create this user's chat when the widget is opened
+  // On open, only RESUME an existing open chat — never create one here.
+  // A chat row is only ever created the moment the customer sends their
+  // first message (see handleSend), so empty/unstarted chats never show
+  // up in the staff inbox.
   useEffect(() => {
     if (!open || !user || chatId) return
 
-    async function initChat() {
+    async function checkExisting() {
       setLoadingChat(true)
 
       const { data: existing } = await supabase
@@ -31,30 +38,16 @@ export default function ChatWidget() {
         .limit(1)
         .maybeSingle()
 
-      let id
-
       if (existing && existing.status === 'open') {
-        // Resume the existing open conversation
-        id = existing.id
+        setChatId(existing.id)
         setChatStatus('open')
         setRating(existing.rating)
-      } else {
-        // No chat yet, or the last one is closed — start a fresh conversation
-        const { data: created } = await supabase
-          .from('chats')
-          .insert({ user_id: user.id })
-          .select('id, status, rating')
-          .single()
-        id = created?.id
-        setChatStatus('open')
-        setRating(null)
       }
 
-      setChatId(id)
       setLoadingChat(false)
     }
 
-    initChat()
+    checkExisting()
   }, [open, user, chatId])
 
   // Load message history + subscribe to realtime updates
@@ -95,13 +88,30 @@ export default function ChatWidget() {
 
   async function handleSend(e) {
     e.preventDefault()
-    if (!input.trim() || !chatId) return
+    if (!input.trim() || !user) return
 
     const content = input.trim()
     setInput('')
 
+    let activeChatId = chatId
+
+    // First message ever in this conversation — create the chat row now,
+    // right as it's actually being used, not before.
+    if (!activeChatId) {
+      const { data: created } = await supabase
+        .from('chats')
+        .insert({ user_id: user.id })
+        .select('id')
+        .single()
+      activeChatId = created?.id
+      setChatId(activeChatId)
+      setChatStatus('open')
+    }
+
+    if (!activeChatId) return
+
     await supabase.from('chat_messages').insert({
-      chat_id: chatId,
+      chat_id: activeChatId,
       sender_role: 'customer',
       content,
     })
@@ -118,13 +128,15 @@ export default function ChatWidget() {
   return (
     <>
       {/* Floating button */}
-      <button
+      <motion.button
         onClick={() => setOpen((v) => !v)}
         aria-label="Open chat"
-        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-lg transition-transform hover:scale-105"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
       >
         {open ? '✕' : <ChatIcon />}
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {open && (
@@ -133,56 +145,83 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-5 z-40 flex h-[480px] w-[340px] max-w-[90vw] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d] shadow-2xl"
+            className="fixed bottom-24 right-5 z-40 flex h-[500px] w-[350px] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl"
           >
-            <div className="border-b border-white/10 px-4 py-3">
-              <p className="font-body text-sm font-semibold text-white">BLXCKSHARK Support</p>
-              <p className="font-body text-xs text-white/40">Live chat with the BLXCKSHARK team</p>
+            {/* Header */}
+            <div className="flex items-center gap-3 border-b border-white/10 bg-gradient-to-r from-white/[0.04] to-transparent px-4 py-3.5">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/10">
+                <img src="/logo-icon.svg" alt="" className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-body text-sm font-semibold text-white">BLXCKSHARK Support</p>
+                <p className="font-body flex items-center gap-1.5 text-xs text-white/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                  Live chat with the team
+                </p>
+              </div>
             </div>
 
             {!user ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+                <img src="/logo-icon.svg" alt="" className="h-8 w-8 opacity-20" />
                 <p className="font-body text-sm text-white/60">Sign in to start a chat with us.</p>
                 <a
                   href="/login"
-                  className="font-body rounded-md bg-white px-5 py-2 text-xs font-semibold text-black"
+                  className="font-body rounded-md bg-white px-5 py-2 text-xs font-semibold text-black transition-transform hover:scale-105"
                 >
                   Sign In
                 </a>
               </div>
             ) : loadingChat ? (
               <div className="flex flex-1 items-center justify-center">
-                <p className="font-body text-xs text-white/40">Loading...</p>
+                <motion.img
+                  src="/logo-icon.svg"
+                  alt=""
+                  className="h-6 w-6"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.4, repeat: Infinity }}
+                />
               </div>
             ) : (
               <>
-                <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+                <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-transparent to-white/[0.015] px-4 py-4">
                   {messages.length === 0 && (
-                    <p className="font-body text-center text-xs text-white/30">
-                      Send a message to start the conversation.
-                    </p>
-                  )}
-                  {messages.map((m) => (
-                    <div
-                      key={m.id}
-                      className={`flex ${m.sender_role === 'customer' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[75%] rounded-lg px-3 py-2 text-sm font-body ${
-                          m.sender_role === 'customer'
-                            ? 'bg-white text-black'
-                            : 'bg-white/10 text-white'
-                        }`}
-                      >
-                        {m.sender_role === 'staff' && (
-                          <p className="mb-0.5 text-[10px] font-semibold text-white/50">
-                            BLXCKSHARK Staff
-                          </p>
-                        )}
-                        {m.content}
-                      </div>
+                    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                      <img src="/logo-icon.svg" alt="" className="h-7 w-7 opacity-15" />
+                      <p className="font-body text-xs text-white/30">
+                        Send a message to start the conversation.
+                      </p>
                     </div>
-                  ))}
+                  )}
+                  <AnimatePresence initial={false}>
+                    {messages.map((m) => (
+                      <motion.div
+                        key={m.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`flex ${m.sender_role === 'customer' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[78%] px-3.5 py-2.5 text-sm font-body ${
+                            m.sender_role === 'customer'
+                              ? 'rounded-2xl rounded-br-sm bg-white text-black'
+                              : 'rounded-2xl rounded-bl-sm bg-white/10 text-white'
+                          }`}
+                        >
+                          {m.sender_role === 'staff' && (
+                            <p className="mb-0.5 text-[10px] font-semibold text-white/50">
+                              BLXCKSHARK Staff
+                            </p>
+                          )}
+                          {m.content}
+                          <p className={`mt-1 text-[10px] ${m.sender_role === 'customer' ? 'text-black/40' : 'text-white/30'}`}>
+                            {formatTime(m.created_at)}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
                 {chatStatus === 'closed' ? (
@@ -201,14 +240,14 @@ export default function ChatWidget() {
                         <button
                           onClick={() => handleRate('up')}
                           aria-label="Thumbs up"
-                          className="rounded-full border border-white/15 p-3 transition-colors hover:bg-white/10"
+                          className="rounded-full border border-white/15 p-3 transition-all hover:scale-110 hover:bg-white/10"
                         >
                           👍
                         </button>
                         <button
                           onClick={() => handleRate('down')}
                           aria-label="Thumbs down"
-                          className="rounded-full border border-white/15 p-3 transition-colors hover:bg-white/10"
+                          className="rounded-full border border-white/15 p-3 transition-all hover:scale-110 hover:bg-white/10"
                         >
                           👎
                         </button>
@@ -222,11 +261,11 @@ export default function ChatWidget() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder="Type a message..."
-                      className="font-body flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
+                      className="font-body flex-1 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs outline-none placeholder:text-white/40"
                     />
                     <button
                       type="submit"
-                      className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black"
+                      className="font-body rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-black transition-transform hover:scale-105"
                     >
                       Send
                     </button>
