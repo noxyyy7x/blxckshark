@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
+import BrandLoader from '@/components/BrandLoader'
+import { BankIcon } from '@/components/Icons'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function AdminCashoutsPage() {
   const { user } = useAuth()
@@ -133,21 +136,30 @@ export default function AdminCashoutsPage() {
   const filtered = requests.filter((r) => filter === 'all' || r.status === filter)
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
-        Cashout Requests
-      </h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <BankIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Cashout Requests
+        </h1>
+      </div>
       <p className="font-body mb-6 text-sm text-white/50">
         Customers redeem their balance as a discount code. Athletes receive a real bank transfer —
         always review their referral history before approving.
       </p>
 
+      <AnimatePresence>
       {generatedCode && (
-        <div className="mb-6 rounded-lg border border-white/20 bg-white/[0.05] p-4">
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6 overflow-hidden rounded-lg border border-white/20 bg-white/[0.05] p-4"
+        >
           <p className="font-body text-sm">
             Code <span className="font-semibold">{generatedCode.code}</span> generated for{' '}
             <span className="font-semibold">{generatedCode.email}</span> — £{Number(generatedCode.amount).toFixed(2)}
@@ -158,11 +170,18 @@ export default function AdminCashoutsPage() {
           <button onClick={() => setGeneratedCode(null)} className="font-body mt-2 text-xs text-white/40 underline">
             Dismiss
           </button>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
+      <AnimatePresence>
       {cashConfirm && (
-        <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6 overflow-hidden rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4"
+        >
           <p className="font-body mb-3 text-sm text-yellow-100">
             Confirm you have <strong>already sent £{Number(cashConfirm.amount).toFixed(2)}</strong> to{' '}
             {cashConfirm.profiles?.display_name || cashConfirm.profiles?.email} via bank transfer.
@@ -217,16 +236,17 @@ export default function AdminCashoutsPage() {
               {processingId === cashConfirm.id ? 'Confirming...' : 'Confirm Sent'}
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       <div className="mb-6 flex gap-1">
         {['pending', 'paid', 'rejected', 'all'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`font-body rounded-full px-3 py-1.5 text-xs capitalize ${
-              filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60'
+            className={`font-body rounded-full px-3 py-1.5 text-xs capitalize transition-colors ${
+              filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60 hover:bg-white/20'
             }`}
           >
             {f}
@@ -235,13 +255,22 @@ export default function AdminCashoutsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="font-body text-sm text-white/40">No {filter !== 'all' ? filter : ''} cashout requests.</p>
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No {filter !== 'all' ? filter : ''} cashout requests.</p>
+        </div>
       ) : (
         <div className="divide-y divide-white/10 border-y border-white/10">
-          {filtered.map((r) => {
+          {filtered.map((r, i) => {
             const isAthlete = r.profiles?.role === 'athlete'
             return (
-              <div key={r.id} className="flex items-center justify-between py-4">
+              <motion.div
+                key={r.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.3) }}
+                className="flex items-center justify-between py-4 transition-colors hover:bg-white/[0.02]"
+              >
                 <div>
                   <p className="font-body text-sm font-semibold">
                     {r.profiles?.display_name || r.profiles?.email}
@@ -260,14 +289,14 @@ export default function AdminCashoutsPage() {
                   <div className="flex items-center gap-2">
                     <a
                       href={`/admin/referral-review?email=${encodeURIComponent(r.profiles?.email || '')}`}
-                      className="font-body rounded-md border border-white/20 px-3 py-2 text-xs"
+                      className="font-body rounded-md border border-white/20 px-3 py-2 text-xs transition-colors hover:bg-white/10"
                     >
                       Review History
                     </a>
                     <button
                       onClick={() => handleReject(r)}
                       disabled={processingId === r.id}
-                      className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold disabled:opacity-50"
+                      className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-50"
                     >
                       Reject
                     </button>
@@ -290,13 +319,14 @@ export default function AdminCashoutsPage() {
                     )}
                   </div>
                 ) : (
-                  <span className={`font-body rounded-full px-3 py-1 text-xs capitalize ${
-                    r.status === 'paid' ? 'bg-white/10 text-white' : 'bg-white/5 text-white/40'
+                  <span className={`font-body flex items-center gap-1.5 rounded-full px-3 py-1 text-xs capitalize ${
+                    r.status === 'paid' ? 'bg-green-400/10 text-green-300' : 'bg-red-400/10 text-red-300'
                   }`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${r.status === 'paid' ? 'bg-green-400' : 'bg-red-400'}`} />
                     {r.status}
                   </span>
                 )}
-              </div>
+              </motion.div>
             )
           })}
         </div>

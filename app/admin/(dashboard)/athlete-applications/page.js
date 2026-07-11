@@ -5,6 +5,9 @@ import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { getStaffProfile, logActivity } from '@/lib/staff'
 import { useToast } from '@/context/ToastContext'
+import BrandLoader from '@/components/BrandLoader'
+import { BadgeCheckIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 export default function AdminAthleteApplicationsPage() {
   const showToast = useToast()
@@ -103,14 +106,17 @@ export default function AdminAthleteApplicationsPage() {
   const filtered = applications.filter((a) => filter === 'all' || a.athlete_application_status === filter)
 
   if (loading) {
-    return <div className="p-8"><p className="font-body text-sm text-white/40">Loading...</p></div>
+    return <div className="flex h-screen items-center justify-center"><BrandLoader /></div>
   }
 
   return (
     <div className="p-8">
-      <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
-        Athlete Applications
-      </h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <BadgeCheckIcon className="h-5 w-5 text-white/50" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+          Athlete Applications
+        </h1>
+      </div>
       <p className="font-body mb-6 text-sm text-white/50">
         Submissions from athlete.blxckshark.com — approving activates their custom code immediately.
       </p>
@@ -120,8 +126,8 @@ export default function AdminAthleteApplicationsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`font-body rounded-full px-3 py-1.5 text-xs capitalize ${
-              filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60'
+            className={`font-body rounded-full px-3 py-1.5 text-xs capitalize transition-colors ${
+              filter === f ? 'bg-white text-black' : 'bg-white/10 text-white/60 hover:bg-white/20'
             }`}
           >
             {f}
@@ -130,11 +136,20 @@ export default function AdminAthleteApplicationsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="font-body text-sm text-white/40">No {filter !== 'all' ? filter : ''} applications.</p>
+        <div className="flex flex-col items-center py-16 text-center">
+          <img src="/logo-icon.svg" alt="" className="mb-3 h-9 w-9 opacity-20" />
+          <p className="font-body text-sm text-white/40">No {filter !== 'all' ? filter : ''} applications.</p>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((a) => (
-            <div key={a.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5">
+          {filtered.map((a, i) => (
+            <motion.div
+              key={a.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.3) }}
+              className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]"
+            >
               <div>
                 <p className="font-body text-sm font-semibold">{a.display_name || a.email}</p>
                 <p className="font-body text-xs text-white/40">
@@ -153,7 +168,7 @@ export default function AdminAthleteApplicationsPage() {
                   <button
                     onClick={() => handleReject(a)}
                     disabled={processingId === a.id}
-                    className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold disabled:opacity-50"
+                    className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-50"
                   >
                     Reject
                   </button>
@@ -166,13 +181,14 @@ export default function AdminAthleteApplicationsPage() {
                   </button>
                 </div>
               ) : (
-                <span className={`font-body rounded-full px-3 py-1 text-xs capitalize ${
-                  a.athlete_application_status === 'approved' ? 'bg-white/10 text-white' : 'bg-white/5 text-white/40'
+                <span className={`font-body flex items-center gap-1.5 rounded-full px-3 py-1 text-xs capitalize ${
+                  a.athlete_application_status === 'approved' ? 'bg-green-400/10 text-green-300' : 'bg-red-400/10 text-red-300'
                 }`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${a.athlete_application_status === 'approved' ? 'bg-green-400' : 'bg-red-400'}`} />
                   {a.athlete_application_status}
                 </span>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
