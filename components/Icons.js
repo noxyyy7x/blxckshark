@@ -142,3 +142,101 @@ export function GooglePayIcon(props) {
     </svg>
   )
 }
+
+// --- Account dashboard tile icons ---
+
+export function BoxIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M3 8l9-5 9 5-9 5-9-5z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 8v8l9 5 9-5V8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 13v8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function GiftIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <rect x="3" y="8" width="18" height="13" rx="1" />
+      <path d="M3 12h18" />
+      <path d="M12 8v13" />
+      <path d="M12 8c-1.5-4-6-4-6-1s3 1 6 1z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 8c1.5-4 6-4 6-1s-3 1-6 1z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ChartIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M4 20V10M12 20V4M20 20v-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ShareIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <circle cx="18" cy="5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="19" r="2.5" />
+      <path d="M8.3 10.7l7.4-4.4M8.3 13.3l7.4 4.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function UsersIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" strokeLinecap="round" />
+      <path d="M16 4.5c1.7.4 3 2 3 3.9 0 1.9-1.3 3.5-3 3.9" strokeLinecap="round" />
+      <path d="M21.5 20c0-3.1-2.1-5.7-5-6.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function BankIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M3 10l9-6 9 6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 10v9M9 10v9M15 10v9M20 10v9" strokeLinecap="round" />
+      <path d="M2.5 21h19" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function GearIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 13a7.97 7.97 0 000-2l2.1-1.6-2-3.5-2.5 1a8 8 0 00-1.7-1L14.9 3h-4l-.4 2.9a8 8 0 00-1.7 1l-2.5-1-2 3.5L6.4 11a7.97 7.97 0 000 2l-2.1 1.6 2 3.5 2.5-1a8 8 0 001.7 1l.4 2.9h4l.4-2.9a8 8 0 001.7-1l2.5 1 2-3.5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ChatBubbleIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function StarIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M12 2.5l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3l-6.2 3.5 1.6-6.8-5.2-4.6 6.9-.6L12 2.5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function BadgeCheckIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
+      <path d="M12 2l2.4 1.2 2.6-.4 1.4 2.3 2.3 1.4-.4 2.6L21.5 12l-1.2 2.4.4 2.6-2.3 1.4-1.4 2.3-2.6-.4L12 21.5l-2.4-1.2-2.6.4-1.4-2.3-2.3-1.4.4-2.6L2.5 12l1.2-2.4-.4-2.6 2.3-1.4 1.4-2.3 2.6.4z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 12.2l2.4 2.3 4.6-4.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
