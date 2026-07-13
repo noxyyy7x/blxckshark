@@ -8,14 +8,16 @@ import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/context/ToastContext'
+import { InstagramIcon, XIcon, TikTokIcon, ThreadsIcon, UsersIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const XP_PER_FOLLOW = 50
 
 const PLATFORMS = [
-  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/blxckshark.co', column: 'followed_instagram' },
-  { key: 'x', label: 'X', href: 'https://x.com/blxcksharkco', column: 'followed_x' },
-  { key: 'tiktok', label: 'TikTok', href: 'https://tiktok.com/@blxckshark.co', column: 'followed_tiktok' },
-  { key: 'threads', label: 'Threads', href: 'https://threads.net/@blxckshark.co', column: 'followed_threads' },
+  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/blxckshark.co', column: 'followed_instagram', Icon: InstagramIcon },
+  { key: 'x', label: 'X', href: 'https://x.com/blxcksharkco', column: 'followed_x', Icon: XIcon },
+  { key: 'tiktok', label: 'TikTok', href: 'https://tiktok.com/@blxckshark.co', column: 'followed_tiktok', Icon: TikTokIcon },
+  { key: 'threads', label: 'Threads', href: 'https://threads.net/@blxckshark.co', column: 'followed_threads', Icon: ThreadsIcon },
 ]
 
 export default function SocialRewardsPage() {
@@ -79,7 +81,10 @@ export default function SocialRewardsPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto max-w-xl px-6 py-12">
-          <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">Social Rewards</h1>
+          <div className="mb-2 flex items-center gap-2.5">
+            <UsersIcon className="h-5 w-5 text-white/50" />
+            <h1 className="font-display text-2xl font-bold uppercase tracking-tight">Social Rewards</h1>
+          </div>
           <p className="font-body mb-8 text-sm text-white/50">
             Follow us and claim {XP_PER_FOLLOW} XP per platform — one-time bonus each.
           </p>
@@ -95,28 +100,40 @@ export default function SocialRewardsPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {PLATFORMS.map((platform) => {
+              {PLATFORMS.map((platform, i) => {
                 const alreadyClaimed = profile?.[platform.column]
                 const isReady = readyToClaim[platform.key]
 
                 return (
-                  <div key={platform.key} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5">
-                    <div>
-                      <p className="font-body text-sm font-semibold">{platform.label}</p>
-                      <p className="font-body text-xs text-white/40">
-                        {alreadyClaimed ? 'Claimed ✓' : `+${XP_PER_FOLLOW} XP`}
-                      </p>
+                  <motion.div
+                    key={platform.key}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: Math.min(i * 0.08, 0.3) }}
+                    className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+                        <platform.Icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="font-body text-sm font-semibold">{platform.label}</p>
+                        <p className="font-body text-xs text-white/40">
+                          {alreadyClaimed ? 'Claimed ✓' : `+${XP_PER_FOLLOW} XP`}
+                        </p>
+                      </div>
                     </div>
 
                     {alreadyClaimed ? (
-                      <span className="font-body rounded-full bg-white/10 px-4 py-2 text-xs text-white/50">
+                      <span className="font-body flex items-center gap-1.5 rounded-full bg-green-400/10 px-4 py-2 text-xs text-green-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                         Claimed
                       </span>
                     ) : isReady ? (
                       <button
                         onClick={() => handleClaim(platform)}
                         disabled={claiming === platform.key}
-                        className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black disabled:opacity-60"
+                        className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black transition-transform hover:scale-105 disabled:opacity-60"
                       >
                         {claiming === platform.key ? 'Claiming...' : `Claim ${XP_PER_FOLLOW} XP`}
                       </button>
@@ -126,12 +143,12 @@ export default function SocialRewardsPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => startClaimTimer(platform)}
-                        className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold"
+                        className="font-body rounded-md border border-white/20 px-4 py-2 text-xs font-semibold transition-colors hover:bg-white/10"
                       >
                         Follow
                       </a>
                     )}
-                  </div>
+                  </motion.div>
                 )
               })}
             </div>

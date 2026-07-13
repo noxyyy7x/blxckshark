@@ -8,6 +8,10 @@ import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { generateShareCard } from '@/lib/generateShareCard'
+import BrandLoader from '@/components/BrandLoader'
+import EmptyState from '@/components/EmptyState'
+import { ShareIcon } from '@/components/Icons'
+import { motion } from 'framer-motion'
 
 const CASHOUT_THRESHOLDS = { customer: 50, athlete: 200 }
 const COMMISSION_PERCENT = { customer: 10, athlete: 20 }
@@ -42,7 +46,18 @@ export default function ReferralPage() {
     load()
   }, [user])
 
-  if (loading || !user || pageLoading) return null
+  if (loading || !user || pageLoading) {
+    return (
+      <>
+        <NotificationBar />
+        <Header />
+        <main className="flex min-h-[60vh] items-center justify-center bg-[#0a0a0a] text-white">
+          <BrandLoader />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   const role = profile?.role || 'customer'
   const threshold = CASHOUT_THRESHOLDS[role]
@@ -83,9 +98,12 @@ export default function ReferralPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto max-w-xl px-6 py-12">
-          <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">
-            Refer a Friend
-          </h1>
+          <div className="mb-2 flex items-center gap-2.5">
+            <ShareIcon className="h-5 w-5 text-white/50" />
+            <h1 className="font-display text-2xl font-bold uppercase tracking-tight">
+              Refer a Friend
+            </h1>
+          </div>
           <p className="font-body mb-8 text-sm text-white/50">
             Share your link — they get {percent}% off, you earn {percent}% commission on every
             order they place.
@@ -104,7 +122,7 @@ export default function ReferralPage() {
               />
               <button
                 onClick={handleCopy}
-                className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black"
+                className="font-body rounded-md bg-white px-4 py-2 text-xs font-semibold text-black transition-transform hover:scale-105"
               >
                 {copied ? 'Copied ✓' : 'Copy'}
               </button>
@@ -135,16 +153,18 @@ export default function ReferralPage() {
             </div>
 
             <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-white transition-all"
-                style={{ width: `${Math.min(100, (balance / threshold) * 100)}%` }}
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, (balance / threshold) * 100)}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="h-full rounded-full bg-white"
               />
             </div>
 
             <button
               onClick={handleCashoutRequest}
               disabled={!canCashout || requesting || hasPendingCashout}
-              className="font-body mt-5 w-full rounded-md bg-white py-3 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-30"
+              className="font-body mt-5 w-full rounded-md bg-white py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100"
             >
               {hasPendingCashout
                 ? 'Redemption Requested — Pending'
@@ -160,23 +180,30 @@ export default function ReferralPage() {
           <div>
             <h2 className="font-body mb-3 text-sm font-semibold">Referral Activity</h2>
             {uses.length === 0 ? (
-              <p className="font-body text-xs text-white/40">
-                No referral activity yet — share your link to start earning.
-              </p>
+              <EmptyState
+                title="No referral activity yet."
+                subtitle="Share your link to start earning commission."
+              />
             ) : (
               <div className="divide-y divide-white/10 border-y border-white/10">
-                {uses.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between py-3 text-sm">
+                {uses.map((u, i) => (
+                  <motion.div
+                    key={u.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.25, delay: Math.min(i * 0.04, 0.3) }}
+                    className="flex items-center justify-between py-3 text-sm transition-colors hover:bg-white/[0.02]"
+                  >
                     <span className="font-body text-white/60">
                       {new Date(u.created_at).toLocaleDateString()}
                     </span>
                     <span className="font-body text-white/70">
                       Order £{Number(u.order_amount).toFixed(2)}
                     </span>
-                    <span className="font-body text-white">
+                    <span className="font-body font-semibold text-green-400">
                       +£{Number(u.commission_earned).toFixed(2)}
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
