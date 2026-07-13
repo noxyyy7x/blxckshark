@@ -7,6 +7,8 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import BrandLoader from '@/components/BrandLoader'
+import { BankIcon } from '@/components/Icons'
 
 export default function PayoutDetailsPage() {
   const { user, loading } = useAuth()
@@ -105,7 +107,18 @@ export default function PayoutDetailsPage() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  if (loading || !user || pageLoading) return null
+  if (loading || !user || pageLoading) {
+    return (
+      <>
+        <NotificationBar />
+        <Header />
+        <main className="flex min-h-[60vh] items-center justify-center bg-[#0a0a0a] text-white">
+          <BrandLoader />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   return (
     <>
@@ -114,7 +127,10 @@ export default function PayoutDetailsPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto max-w-md px-6 py-12">
-          <h1 className="font-display mb-2 text-2xl font-bold uppercase tracking-tight">Payout Details</h1>
+          <div className="mb-2 flex items-center gap-2.5">
+            <BankIcon className="h-5 w-5 text-white/50" />
+            <h1 className="font-display text-2xl font-bold uppercase tracking-tight">Payout Details</h1>
+          </div>
 
           {!isAthlete ? (
             <p className="font-body text-sm text-white/40">
@@ -203,7 +219,7 @@ export default function PayoutDetailsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="font-body mt-2 rounded-md bg-white py-3 text-sm font-semibold text-black disabled:opacity-60"
+                  className="font-body mt-2 rounded-md bg-white py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02] disabled:opacity-60"
                 >
                   {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Payout Details'}
                 </button>

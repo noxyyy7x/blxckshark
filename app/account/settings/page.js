@@ -8,6 +8,8 @@ import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/context/ToastContext'
+import BrandLoader from '@/components/BrandLoader'
+import { GearIcon, LockIcon, BoxIcon } from '@/components/Icons'
 
 export default function SettingsPage() {
   const showToast = useToast()
@@ -175,7 +177,18 @@ export default function SettingsPage() {
     setAddresses((prev) => prev.map((a) => ({ ...a, is_default: a.id === id })))
   }
 
-  if (loading || !user || pageLoading) return null
+  if (loading || !user || pageLoading) {
+    return (
+      <>
+        <NotificationBar />
+        <Header />
+        <main className="flex min-h-[60vh] items-center justify-center bg-[#0a0a0a] text-white">
+          <BrandLoader />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   return (
     <>
@@ -184,7 +197,10 @@ export default function SettingsPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
         <div className="mx-auto max-w-md px-6 py-12">
-          <h1 className="font-display mb-8 text-2xl font-bold uppercase tracking-tight">Settings</h1>
+          <div className="mb-8 flex items-center gap-2.5">
+            <GearIcon className="h-5 w-5 text-white/50" />
+            <h1 className="font-display text-2xl font-bold uppercase tracking-tight">Settings</h1>
+          </div>
 
           {/* Profile picture */}
           <div className="mb-8 flex items-center gap-4">
@@ -250,7 +266,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="font-body mt-2 rounded-md bg-white py-3 text-sm font-semibold text-black disabled:opacity-60"
+              className="font-body mt-2 rounded-md bg-white py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02] disabled:opacity-60"
             >
               {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Changes'}
             </button>
@@ -258,7 +274,10 @@ export default function SettingsPage() {
 
           {/* Password change */}
           <div className="mt-10 border-t border-white/10 pt-8">
-            <h2 className="font-body mb-4 text-sm font-semibold">Change Password</h2>
+            <h2 className="font-body mb-4 flex items-center gap-2 text-sm font-semibold">
+              <LockIcon className="h-4 w-4 text-white/40" />
+              Change Password
+            </h2>
             <form onSubmit={handlePasswordChange} className="flex flex-col gap-3">
               <input
                 type="password"
@@ -288,7 +307,10 @@ export default function SettingsPage() {
           {/* Address book */}
           <div className="mt-10 border-t border-white/10 pt-8">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-body text-sm font-semibold">Address Book</h2>
+              <h2 className="font-body flex items-center gap-2 text-sm font-semibold">
+                <BoxIcon className="h-4 w-4 text-white/40" />
+                Address Book
+              </h2>
               <button
                 onClick={() => setShowAddForm((v) => !v)}
                 className="font-body text-xs text-white/50 underline hover:text-white"
@@ -339,7 +361,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={addressSaving}
-                  className="font-body rounded-md bg-white py-2 text-sm font-semibold text-black disabled:opacity-60"
+                  className="font-body rounded-md bg-white py-2 text-sm font-semibold text-black transition-transform hover:scale-[1.02] disabled:opacity-60"
                 >
                   {addressSaving ? 'Saving...' : 'Save Address'}
                 </button>
