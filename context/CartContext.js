@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 
 const CartContext = createContext(null)
 const STORAGE_KEY = 'blxckshark_cart'
@@ -8,6 +8,8 @@ const STORAGE_KEY = 'blxckshark_cart'
 export function CartProvider({ children }) {
   const [items, setItems] = useState([])
   const [loaded, setLoaded] = useState(false)
+  const cartIconRef = useRef(null)
+  const [flyingItem, setFlyingItem] = useState(null)
 
   // Load cart from localStorage on first mount
   useEffect(() => {
@@ -61,12 +63,30 @@ export function CartProvider({ children }) {
     setItems([])
   }
 
+  // Kicks off the fly-to-cart animation — needs the image URL and the DOM
+  // element it should visually fly FROM (the cart icon target is read from
+  // cartIconRef, registered by Header on mount).
+  function triggerFly(imageUrl, fromElement) {
+    if (!imageUrl || !fromElement || !cartIconRef.current) return
+    const fromRect = fromElement.getBoundingClientRect()
+    const toRect = cartIconRef.current.getBoundingClientRect()
+    setFlyingItem({
+      id: Date.now(),
+      imageUrl,
+      from: { x: fromRect.left + fromRect.width / 2, y: fromRect.top + fromRect.height / 2 },
+      to: { x: toRect.left + toRect.width / 2, y: toRect.top + toRect.height / 2 },
+    })
+  }
+
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal, itemCount }}
+      value={{
+        items, addItem, removeItem, updateQuantity, clearCart, subtotal, itemCount,
+        cartIconRef, flyingItem, setFlyingItem, triggerFly,
+      }}
     >
       {children}
     </CartContext.Provider>

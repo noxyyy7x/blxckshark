@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
@@ -31,7 +31,8 @@ export default function ProductDetailClient({ product, related }) {
   const [wishlisted, setWishlisted] = useState(false)
   const [addedMessage, setAddedMessage] = useState(false)
 
-  const { addItem } = useCart()
+  const { addItem, triggerFly } = useCart()
+  const imageRef = useRef(null)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -68,6 +69,9 @@ export default function ProductDetailClient({ product, related }) {
       quantity,
       image: product.images?.[0] || null,
     })
+    if (product.images?.[0]) {
+      triggerFly(product.images[0], imageRef.current)
+    }
     setAddedMessage(true)
     setTimeout(() => setAddedMessage(false), 2000)
   }
@@ -101,7 +105,7 @@ export default function ProductDetailClient({ product, related }) {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-10 lg:grid-cols-2 lg:gap-16">
           {/* Image gallery */}
           <div>
-            <div className="aspect-[4/5] w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+            <div ref={imageRef} className="aspect-[4/5] w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
               {product.images?.[0] ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />

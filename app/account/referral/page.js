@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import NotificationBar from '@/components/NotificationBar'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
+import { generateShareCard } from '@/lib/generateShareCard'
 
 const CASHOUT_THRESHOLDS = { customer: 50, athlete: 200 }
 const COMMISSION_PERCENT = { customer: 10, athlete: 20 }
@@ -111,6 +112,12 @@ export default function ReferralPage() {
             <p className="font-body mt-3 text-xs text-white/40">
               Code: <span className="text-white/70">{profile?.referral_code}</span>
             </p>
+            <button
+              onClick={() => generateShareCard({ code: profile?.referral_code, percent })}
+              className="font-body mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-white/15 py-2.5 text-xs font-semibold transition-colors hover:bg-white/10"
+            >
+              📲 Download Share Card
+            </button>
           </div>
 
           {/* Balance + cashout */}

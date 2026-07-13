@@ -6,6 +6,7 @@ import ChatWidgetGate from '@/components/ChatWidgetGate'
 import CookieConsent from '@/components/CookieConsent'
 import AnalyticsGate from '@/components/AnalyticsGate'
 import CustomCursor from '@/components/CustomCursor'
+import FlyingCartItem from '@/components/FlyingCartItem'
 
 export const metadata = {
   title: {
@@ -33,6 +34,7 @@ export default function RootLayout({ children }) {
               <CookieConsent />
               <AnalyticsGate />
               <CustomCursor />
+              <FlyingCartItem />
             </ToastProvider>
           </CartProvider>
         </AuthProvider>

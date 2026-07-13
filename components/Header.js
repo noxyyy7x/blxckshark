@@ -15,7 +15,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const router = useRouter()
-  const { itemCount } = useCart()
+  const { itemCount, cartIconRef } = useCart()
   const { user } = useAuth()
   const [hasUnread, setHasUnread] = useState(false)
   const [wishlistCount, setWishlistCount] = useState(0)
@@ -114,7 +114,7 @@ export default function Header() {
               <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-white ring-2 ring-[#0a0a0a]" />
             )}
           </a>
-          <a href="/cart" aria-label="Cart" className="relative">
+          <a href="/cart" aria-label="Cart" ref={cartIconRef} className="relative">
             <CartIcon />
             {itemCount > 0 && <CartBadge count={itemCount} />}
           </a>
