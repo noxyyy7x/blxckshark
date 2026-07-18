@@ -27,11 +27,15 @@ export default function AboutPage() {
       <main className="bg-[#0a0a0a] text-white">
         {/* Hero statement */}
         <section className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
-          <div className="pointer-events-none absolute inset-0">
-            <div
-              className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.06] blur-3xl"
-              style={{ background: 'radial-gradient(circle, #fff, transparent 70%)' }}
+          <div className="absolute inset-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/coming-soon-bg.jpg"
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ objectPosition: 'center 20%' }}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/75 to-black/55" />
           </div>
 
           <motion.p
