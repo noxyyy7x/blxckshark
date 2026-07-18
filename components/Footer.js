@@ -6,6 +6,7 @@ import {
   XIcon,
   ThreadsIcon,
   TikTokIcon,
+  LinkedInIcon,
   VisaIcon,
   MastercardIcon,
   AmexIcon,
@@ -55,6 +56,7 @@ const socials = [
   { name: 'X', href: 'https://x.com/blxcksharkco', Icon: XIcon },
   { name: 'Threads', href: 'https://threads.net/@blxckshark.co', Icon: ThreadsIcon },
   { name: 'TikTok', href: 'https://tiktok.com/@blxckshark.co', Icon: TikTokIcon },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/blxckshark/', Icon: LinkedInIcon },
 ]
 
 const paymentIcons = [VisaIcon, MastercardIcon, AmexIcon, ApplePayIcon, GooglePayIcon]
